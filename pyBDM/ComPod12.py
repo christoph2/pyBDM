@@ -1,6 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+__version__="0.1.0"
+
+__copyright__="""
+    pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
+
+   (C) 2010-2011 by Christoph Schueler <github.com/Christoph2,
+                                        cpu12.gems@googlemail.com>
+
+   All Rights Reserved
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 import BDM
 import Serial
 
@@ -11,14 +36,11 @@ from Port import Port
 ##  BMD-Commands.
 ##
 
-# *** Elektronik-Laden ***
 RESET           = 0x80 # Reset
 FILL_AREA       = 0x82 # FILL_AREA ADDR_HI ADDR_LO CNT DATA
 READ_AREA       = 0x83 # READ_AREA ADDR_HI ADDR_LO CNT (0==0xff)
 VERSION         = 0xFF
 
-
-#END-*** Elektronik-Laden ***
 
 BACKGROUND      = 0x90 # Enter background mode if firmware enabled.
 READ_BD_BYTE    = 0xE4 # Read from memory with BDM in map.
@@ -55,6 +77,9 @@ def com(v):
 class ComPod12(Device,Serial.Port):
     MAX_PAYLOAD=0xff
     DEVICE_NAME="Elektronik-Laden ComPOD12"
+
+    def close(self):
+        self.port.close()
 
     def __writeCommand__(self,cmd,responseLen):
         self.write(cmd)
@@ -112,120 +137,130 @@ class ComPod12(Device,Serial.Port):
         if (d[0]!=com(cmd)):
             raise InvalidResponseError
 
-    def Reset(self):
+    def reset(self):
         self.__writeCommand__(RESET,1)
 
     def getPODVersion(self):
         data=self.__readCommand__(VERSION,2)
         return "%s v%02u.%02u" % (self.DEVICE_NAME,data[0],data[1])
 
-    def TargetGo(self):
+    def targetGo(self):
         self.__writeCommand__(GO,1)
 
-    def TargetTagGo(self):
+    def targetTagGo(self):
         self.__writeCommand__(TAGGO,1)
 
-    def TargetHalt(self):
+    def targetHalt(self):
         self.__writeCommand__(BACKGROUND,1)
 
-    def TargetTrace(self):
+    def targetTrace(self):
         self.__writeCommand__(TRACE1,1)
 
-    def ReadBDWORD(self,addr):
+    def readBDWord(self,addr):
         return self.__readWord__(READ_BD_WORD,addr)
 
-    def ReadWORD(self,addr):
+    def readWord(self,addr):
         return self.__readWord__(READ_WORD,addr)
 
-    def ReadBDByte(self,addr):
+    def readBDByte(self,addr):
         data=self.__readCommand__(READ_BD_BYTE,1,addr)
         return data[0]
 
-    def ReadByte(self,addr):
+    def readByte(self,addr):
         data=self.__readCommand__(READ_BYTE,1,addr)
         return data[0]
 
-    def ReadNext(self):
+    def readNext(self):
         return self.__readWord__(READ_NEXT)
 
-    def ReadPC(self):
+    def readPC(self):
         return self.__readWord__(READ_PC)
 
-    def ReadD(self):
+    def readD(self):
         return self.__readWord__(READ_D)
 
-    def ReadX(self):
+    def readX(self):
         return self.__readWord__(READ_X)
 
-    def ReadY(self):
+    def readY(self):
         return self.__readWord__(READ_Y)
         
-    def ReadSP(self):
+    def readSP(self):
         return self.__readWord__(READ_SP)
 
-    def ReadCCR(self):
-        return self.ReadBDByte(0xff06)
+    def readCCR(self):
+        return self.readBDByte(0xff06)
 
-    def WritePC(self,data):
+    def writePC(self,data):
         self.__writeWord__(WRITE_PC,data)
 
-    def WriteD(self,data):
+    def writeD(self,data):
         self.__writeWord__(WRITE_D,data)
 
-    def WriteX(self,data):
+    def writeX(self,data):
         self.__writeWord__(WRITE_X,data)
 
-    def WriteY(self,data):
+    def writeY(self,data):
         self.__writeWord__(WRITE_Y,data)
 
-    def WriteSP(self,data):
+    def writeSP(self,data):
         self.__writeWord__(WRITE_SP,data)
 
-    def WriteCCR(self,data):
+    def writeCCR(self,data):
         return self.WriteBDByte(0xff06,data)
 
-    def WriteBDWord(self,addr,data):
+    def writeBDWord(self,addr,data):
         self.__writeWord__(WRITE_BD_WORD,addr,data)
 
-    def WriteWord(self,addr,data):
+    def writeWord(self,addr,data):
         self.__writeWord__(WRITE_WORD,addr,data)
 
-    def WriteBDByte(self,addr,data):
+    def writeBDByte(self,addr,data):
         self.__writeByte__(WRITE_BD_BYTE,addr,data)
 
-    def WriteByte(self,addr,data):
+    def writeByte(self,addr,data):
         self.__writeByte__(WRITE_BYTE,addr,data)
 
-    def WriteNext(self,data):
+    def writeNext(self,data):
         self.__writeWord__(WRITE_NEXT,data)
 
+    def __readArea__(self,addr,length):
+        self.write(READ_AREA)
+        self.write((addr>>8) & 0xff)
+        self.write(addr & 0xff)
+        self.write(length)
+        data=self.read(length)
+        if len(data)==0:
+            raise NoResponseError
+        if len(data)!=length:
+            raise InvalidResponseError
+        return data
 
-c=ComPod12(0,38400)
-print c.getPODVersion()
-c.Reset()
-c.TargetHalt()
-#c.TargetTrace()
+    def readArea(self,addr,length):
+        if length==0:
+            return None
+        loops=length / self.MAX_PAYLOAD
+        bytesRemaining=length % self.MAX_PAYLOAD
+        offset=addr
+        result=bytearray()
+        for l in range(loops):
+            data=self.__readArea__(offset,self.MAX_PAYLOAD)
+            result.extend(data)
+            offset+=self.MAX_PAYLOAD
+        if bytesRemaining:
+            data=self.__readArea__(offset,bytesRemaining)
+            result.extend(data)
+        return result
 
-c.WritePC(0x4712)
-c.WriteX(0xdead)
-c.WriteY(0xaffe)
-
-c.WriteByte(0x1000,0x33)
-c.WriteByte(0x1001,0x44)
-c.WriteByte(0x1002,0x55)
-c.WriteByte(0x1003,0x66)
-
-print hex(c.ReadWORD(0xFFFe))
-
-print hex(c.ReadWORD(0x1000)),hex(c.ReadWORD(0x1002))
-
-print hex(c.ReadByte(0x1001))
-print hex(c.ReadByte(0x1002))
-print hex(c.ReadByte(0x1003))
-
-print hex(c.ReadPC())
-print hex(c.ReadSP())
-print hex(c.ReadD())
-print hex(c.ReadX())
-print hex(c.ReadY())
-print hex(c.ReadCCR())
+    def __fillArea__(self,addr,length,data):
+        self.write(FILL_AREA)
+        self.write((addr>>8) & 0xff)
+        self.write(addr & 0xff)
+        self.write(length)
+        self.write(data)
+        data=self.read(1)
+        print
+        '''
+        if len(data)==0:
+            raise NoResponseError
+        '''
