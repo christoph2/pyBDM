@@ -37,7 +37,7 @@ from Port import Port
 ##
 
 RESET           = 0x80 # Reset
-FILL_AREA       = 0x82 # FILL_AREA ADDR_HI ADDR_LO CNT DATA
+WRITE_AREA      = 0x82 # FILL_AREA ADDR_HI ADDR_LO CNT DATA
 READ_AREA       = 0x83 # READ_AREA ADDR_HI ADDR_LO CNT (0==0xff)
 VERSION         = 0xFF
 
@@ -104,7 +104,7 @@ class ComPod12(Device,Serial.Port):
         if len(data)!=responseLen:
             raise InvalidResponseError
         return data
-    
+
     def __readWord__(self,cmd,addr=None):
         data=self.__readCommand__(cmd,2,addr)
         if data==bytearray():
@@ -184,7 +184,7 @@ class ComPod12(Device,Serial.Port):
 
     def readY(self):
         return self.__readWord__(READ_Y)
-        
+
     def readSP(self):
         return self.__readWord__(READ_SP)
 
@@ -236,6 +236,21 @@ class ComPod12(Device,Serial.Port):
             raise InvalidResponseError
         return data
 
+    def __writeArea__(self,addr,length,data):
+        self.write(WRITE_AREA)
+        self.write((addr>>8) & 0xff)
+        self.write(addr & 0xff)
+        self.write(length)
+        self.write(data)
+        d=self.read(1)
+        if d==bytearray():
+            raise NoResponseError
+        if (d[0]!=com(WRITE_AREA)):
+            raise InvalidResponseError
+
+    def __fillArea__(self,addr,length,value):
+        self.__writeArea__(addr,length,[value]*length)
+
     def readArea(self,addr,length):
         if length==0:
             return None
@@ -251,16 +266,3 @@ class ComPod12(Device,Serial.Port):
             data=self.__readArea__(offset,bytesRemaining)
             result.extend(data)
         return result
-
-    def __fillArea__(self,addr,length,data):
-        self.write(FILL_AREA)
-        self.write((addr>>8) & 0xff)
-        self.write(addr & 0xff)
-        self.write(length)
-        self.write(data)
-        data=self.read(1)
-        print
-        '''
-        if len(data)==0:
-            raise NoResponseError
-        '''

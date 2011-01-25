@@ -88,11 +88,11 @@ class Device(object):
     def close(self):                    pass
 
     def getPartID(self):
-        """Note the 'classic' HC12-Derivates don't have PartID-Registers! """
+        """Note: the 'classic' HC12-Derivates don't have PartID-Registers! """
         return self.readWord(0x001a)
 
-    def getMemorySizes(self): #todo: Zerlegen in RAM/FLASH/EEPROM!!!
-        """Note the 'classic' HC12-Derivates don't have MEMSIZE-Registers! """
+    def getMemorySizes(self):
+        """Note: the 'classic' HC12-Derivates don't have MEMSIZE-Registers! """
 
         EEP_MAP={0: 0, 1: 2*1024, 2: 4*1024, 3: 8*1024}
         RAM_MAP={0: 2*1024, 1: 4*1024, 2: 6*1024, 3: 8*1024, 4: 10*1024, 5: 12*1024, 6: 14*1024, 7: 16*1024}
@@ -111,7 +111,6 @@ class Device(object):
         pageSpace=(memSize & 0x0003)
 
         return MemorySizes(regSpace,eepSpace,ramSpace,allocRomSpace)
-# def getBDMStatus(self)
 
     def writeArea(self,addr,data):
         pass
