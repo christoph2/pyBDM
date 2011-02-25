@@ -36,12 +36,20 @@ class Port(Port.Port):
     def __init__(self,num,baudrate,bytesize=serial.EIGHTBITS,
         parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=0.1):
         self.port=None
+        self.num=num
+        self.baudrate=baudrate
+        self.bytesize=bytesize
+        self.parity=parity
+        self.stopbits=stopbits
+        self.timeout=timeout
+
+    def connect(self):
         try:
-            self.port=serial.Serial(port=num,baudrate=baudrate,bytesize=bytesize,
-                parity=parity,stopbits=stopbits,timeout=timeout)
+            self.port=serial.Serial(port=self.num,baudrate=self.baudrate,bytesize=self.bytesize,
+                parity=self.parity,stopbits=self.stopbits,timeout=self.timeout)
         except serial.SerialException,e:
-            print sys.exc_info
-            raise e
+            raise
+
 #        print "OK, openend as '%s' @ %d Bits/Sec." % (self.port.portstr,self.port.baudrate)
 
     def __del__(self):
@@ -57,6 +65,11 @@ class Port(Port.Port):
     def read(self,len):
         data=self.port.read(len)
         return bytearray(data)
+
+    def close(self):
+        if not self.port.closed:
+            self.port.close()
+
 
 
 def main():
