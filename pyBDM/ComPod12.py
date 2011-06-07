@@ -151,12 +151,7 @@ class ComPod12(Device, Serial.Port):
             raise InvalidResponseError
         return data
 
-    def __writeArea__(
-        self,
-        addr,
-        length,
-        data,
-        ):
+    def __writeArea__(self, addr, length, data):
         self.write(WRITE_AREA)
         self.write(addr >> 8 & 255)
         self.write(addr & 255)
@@ -168,30 +163,9 @@ class ComPod12(Device, Serial.Port):
         if d[0] != com(WRITE_AREA):
             raise InvalidResponseError
 
-    def __fillArea__(
-        self,
-        addr,
-        length,
-        value,
-        ):
+    def __fillArea__(self, addr, length, value):
         self.__writeArea__(addr, length, [value] * length)
 
-    def readArea(self, addr, length):
-        if length == 0:
-            return None
-        loops = length / self.MAX_PAYLOAD
-        bytesRemaining = length % self.MAX_PAYLOAD
-        offset = addr
-        result = bytearray()
-        for l in range(loops):
-            self.logger.debug('Reading %u bytes starting @ 0x%04x.'
-                              % (self.MAX_PAYLOAD, offset))
-            data = self.__readArea__(offset, self.MAX_PAYLOAD)
-            result.extend(data)
-            offset += self.MAX_PAYLOAD
-        if bytesRemaining:
-            self.logger.debug('Reading %u bytes starting @ 0x%04x.'
-                              % (bytesRemaining, offset))
-            data = self.__readArea__(offset, bytesRemaining)
-            result.extend(data)
-        return result
+    def writeArea(self, addr, data):
+        print "COMPod12 write-area"
+        self.logger.debug("")

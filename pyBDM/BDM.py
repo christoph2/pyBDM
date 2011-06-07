@@ -74,6 +74,8 @@ formatter=logging.Formatter("%(asctime)s - %(name)s[%(levelname)s]: %(message)s"
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+class CommunicationError(Exception): pass
+
 class Device(object):
     __metaclass__=abc.ABCMeta
     DEVICE_NAME=None
