@@ -226,5 +226,62 @@ class Device(object):
 
         return MemorySizes(regSpace,eepSpace,ramSpace,allocRomSpace)
 
-    def writeArea(self,addr,data):
-        self.logger.debug("")
+
+    def readArea(self,addr,length):
+        if length == 0:
+            return None
+        loops=length / self.MAX_PAYLOAD
+        bytesRemaining = length % self.MAX_PAYLOAD
+        offset = addr
+        result=bytearray()
+        for l in range(loops):
+            self.logger.debug("Reading %u bytes starting @ 0x%04x." % (self.MAX_PAYLOAD, offset))
+            data = self.__readArea__(offset, self.MAX_PAYLOAD)
+            result.extend(data)
+            offset += self.MAX_PAYLOAD
+        if bytesRemaining:
+            self.logger.debug("Reading %u bytes starting @ 0x%04x." % (bytesRemaining, offset))
+            data = self.__readArea__(offset,bytesRemaining)
+            result.extend(data)
+        return result
+
+    '''
+    def readArea(self, addr, length):
+
+    '''
+    def fillArea(self, addr, value, length):
+        if length == 0:
+            return
+        loops=length / self.MAX_PAYLOAD
+        bytesRemaining = length % self.MAX_PAYLOAD
+        offset = addr
+        for l in range(loops):
+            self.logger.debug("Filling %u bytes with 0x%02x starting @ 0x%04x." % (self.MAX_PAYLOAD, value, offset))
+            self.__writeArea__(offset, self.MAX_PAYLOAD, [value] * self.MAX_PAYLOAD)
+            offset += self.MAX_PAYLOAD
+        if bytesRemaining:
+            self.logger.debug("Filling %u bytes with 0x%02x starting @ 0x%04x." % (bytesRemaining, value, offset))
+            self.__writeArea__(offset, bytesRemaining, [value] * bytesRemaining)
+
+    def writeArea(self, addr, data):
+        length = len(data)
+        if length == 0:
+            return None
+        loops = length / self.MAX_PAYLOAD
+        bytesRemaining = length % self.MAX_PAYLOAD
+        addrOffset = addr
+
+        dataOffsetFrom = 0
+        dataOffsetTo = self.MAX_PAYLOAD
+        for l in range(loops):
+            self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (self.MAX_PAYLOAD, addrOffset))
+            slice = data[dataOffsetFrom : dataOffsetTo]
+            self.__writeArea__(addrOffset, self.MAX_PAYLOAD, slice)
+            addrOffset += self.MAX_PAYLOAD
+            dataOffsetFrom = dataOffsetTo
+            dataOffsetTo = dataOffsetFrom + self.MAX_PAYLOAD
+        if bytesRemaining:
+            self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
+            self.__writeArea__(addrOffset, bytesRemaining, data)
+
+
