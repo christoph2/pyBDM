@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+##!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 __version__="0.1.0"
@@ -760,7 +760,7 @@ opcodeMapPage1 ={
     0xa4 : ("ANDA", '3-6', ID , '2-4'),
     0xa5 : ("BITA", '3-6', ID , '2-4'),
     0xa6 : ("LDAA", '3-6', ID , '2-4'),
-    0xa7 : ("Nmnemonic", 1, IH, 1),
+    0xa7 : ("NOP",  1, IH, 1),
     0xa8 : ("EORA", '3-6', ID , '2-4'),
     0xa9 : ("ADCA", '3-6', ID , '2-4'),
     0xaa : ("ORAA", '3-6', ID , '2-4'),
@@ -1152,7 +1152,7 @@ class CachedMemory(object):
         if page not in self.cache:
             data = self.readFunc(page, self.pagesize)
             self.cache[page] = data
-            #print map(hex,data)
+            #print map(hex,memory)
         return self.cache[page][offset]
 
     def getWord(self, address):
@@ -1193,32 +1193,31 @@ isBitFunction = lambda fn: fn in ('BSET', 'BCLR')
 isBitBranchFunction = lambda fn: fn in ('BRSET', 'BRCLR')
 
 
-# 0x4320 20 -- LBRA	0x4342 eigentlich 43B1!?
-# 0x570D 63 -- DEC	7,PC    must be: 0x570D 63C7 DEC     5716,PCR
+# 0x4320 20 -- LBRA 0x4342 eigentlich 43B1!?
+# 0x570D 63 -- DEC  7,PC    must be: 0x570D 63C7 DEC     5716,PCR
 
-def disasm(addr, data):
+
+def disasm(addr, memory):
+    decoder = PostbyteDecoder()
     pc = addr
-    op = data.getByte(pc)
+    op = memory.getByte(pc)
     mnemonic, cycles, mode, size = opcodeMapPage1.get(op, None)
-    print "0x%04X %02x -- '%s'" % (pc, data.getByte(pc), mnemonic)
+    print "0x%04X %02x -- '%s'" % (pc, memory.getByte(pc), mnemonic)
     operand = ''
     xb = None
     lb = None
     while True:
         pc += size
-        pc &= 0xffff
-        op = data.getByte(pc)
+        pc &= 0xfffff
+        op = memory.getByte(pc)
         operand = ''
         mnemonic, cycles, mode, size = opcodeMapPage1.get(op, None)
 
-        if pc == 0x570D:
-            pass
-
         if op == PAGE_TWO:
-            op = data.getByte(pc + 1)
+            op = memory.getByte(pc + 1)
             mnemonic, cycles, mode, size = opcodeMapPage2.get(op, None)
         elif op == TFR_EXG:
-            op = data.getByte(pc + 1)
+            op = memory.getByte(pc + 1)
             eb = EB[op]
             mnemonic, operand = tfrOrExg(op), eb
 
@@ -1226,19 +1225,22 @@ def disasm(addr, data):
             pass
         elif mode == IM:
             if size == 2:
-                operand = '#$%02X' % data.getByte(pc + 1)
+                operand = '#$%02X' % memory.getByte(pc + 1)
             elif size == 3:
-                operand = '#$%04X' % ((data.getByte(pc + 1) << 8) | data.getByte(pc + 2),)
+                operand = '#$%04X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2),)
             else:
                 raise NotImplementedError
         elif mode == ID:
-            op2 = data.getByte(pc + 1)
+            op2 = memory.getByte(pc + 1)
+            operand = decoder.decode(op2)
+            """
+            op2 = memory.getByte(pc + 1)
             xb = XB[op2]
             operand = xb[0]
             if xb[1] == '5b const':
                 if isBitFunction(mnemonic):
                     size = 3
-                    mm = data.getByte(pc + 2)
+                    mm = memory.getByte(pc + 2)
                     operand +=  " #$%02X" % mm
                 elif isBitBranchFunction(mnemonic):
                     size = 4
@@ -1249,29 +1251,29 @@ def disasm(addr, data):
                     pass
                 elif isBitBranchFunction(mnemonic):
                     pass
-                const = data.getByte(pc + 2)
+                const = memory.getByte(pc + 2)
                 if (op2 & 0x01) == 0x01:
                     const = (~const & 0xff) + 1
                 size = 3
                 operand = operand % ("$%02X" % const)
             elif xb[1] == '16b const':
-                const = ((data.getByte(pc + 2) << 8) | data.getByte(pc + 3))
+                const = ((memory.getByte(pc + 2) << 8) | memory.getByte(pc + 3))
                 operand = operand % ("$%04X" % const)
                 size = 4
             elif xb[1] == '16b indr':
-                const = ((data.getByte(pc + 2) << 8) | data.getByte(pc + 3))
+                const = ((memory.getByte(pc + 2) << 8) | memory.getByte(pc + 3))
                 operand = operand % ("$%04X" % const)
                 size = 4
             elif xb[1] == 'A offset':
-                #operand +=  " #$%02X" % data.getByte(pc+2)
+                #operand +=  " #$%02X" % memory.getByte(pc+2)
                 size = 2
                 pass    # ???
             elif xb[1] == 'D offset':
                 size = 2
             elif xb[1] == 'D indr':
-                size = 2    # data.getByte(pc+2)
+                size = 2    # memory.getByte(pc+2)
             elif xb[1] == 'B offset':
-                operand +=  " #$%02X" % data.getByte(pc+2)
+                operand +=  " #$%02X" % memory.getByte(pc+2)
                 size = 3
             elif xb[1] == 'pre-inc':
                 size = 2
@@ -1284,63 +1286,64 @@ def disasm(addr, data):
             else:
                 # 1676          E9FA7F77         ADCB    0:95F1,PCR
                 raise NotImplementedError,"Adressing-Mode: '%s'" % xb[1]    # CALL b,sp 06
+            """
         elif mode == EX:
             if isBitFunction(mnemonic):
                 # 0x56BF 1C -- BSET $2087   // 0x56BF   1C208707      BSET    2087 #07
-                operand = '$%04X #$%02X' % ((data.getByte(pc + 1) << 8) | data.getByte(pc + 2), data.getByte(pc + 3))
+                operand = '$%04X #$%02X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2), memory.getByte(pc + 3))
             elif isBitBranchFunction(mnemonic):
                 pass
             else:
-                operand = '$%04X' % ((data.getByte(pc + 1) << 8) | data.getByte(pc + 2),)
+                operand = '$%04X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2),)
         elif mode == RL:
             if op == LOOP:
                 try:
-                    lb = LB[data.getByte(pc + 1)] # DBNE    Y,467B     0436FC
-                    rel = data.getByte(pc + 2)
+                    lb = LB[memory.getByte(pc + 1)] # DBNE    Y,467B     0436FC
+                    rel = memory.getByte(pc + 2)
                     if rel >= 0x80: # todo: Factor out!!!
                         rel = -((~rel & 0xff) + 1)
                     operand = "%s,$%04X" % (lb[1], (pc + 2 + rel))
                     mnemonic = lb[0]
                 except:
                     mnemonic = "TRAP"
-                    operand = "($%02x $%02x)" % (op, data.getByte(pc + 1))
+                    operand = "($%02x $%02x)" % (op, memory.getByte(pc + 1))
             else:
-                rel = data.getByte(pc + 1)
+                rel = memory.getByte(pc + 1)
                 if rel >= 0x80: # todo: Factor out!!!
                     rel = -((~rel & 0xff) + 1)
                 operand = "0x%04X" % (pc + 2 + rel)
         elif mode == SPECIAL:
             pass
         elif mode == DI:
-            operand = '$%02X' % (data.getByte(pc + 1))
+            operand = '$%02X' % (memory.getByte(pc + 1))
         elif isinstance(mode, basestring):
             if mode == 'im-id':
-                xb = XB[data.getByte(pc + 2)]
+                xb = XB[memory.getByte(pc + 2)]
                 if size == 4:
-                    operand = "#$%02X %s" % ((data.getByte(pc + 3)), xb[0])
+                    operand = "#$%02X %s" % ((memory.getByte(pc + 3)), xb[0])
                 elif size == 5:
-                    operand = "#$%04X %s" % (((data.getByte(pc + 3) << 8) | (data.getByte(pc + 4))), xb[0])
+                    operand = "#$%04X %s" % (((memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4))), xb[0])
                 else:
                     raise NotImplementedError
             elif mode == 'ex-id':
-                xb = XB[data.getByte(pc + 2)]
-                operand = "$%04X %s" % (((data.getByte(pc + 3) << 8) | data.getByte(pc + 4)), xb[0])
+                xb = XB[memory.getByte(pc + 2)]
+                operand = "$%04X %s" % (((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)), xb[0])
             elif mode == 'id-id':
-                xb1 = XB[data.getByte(pc + 2)]
-                xb2 = XB[data.getByte(pc + 3)]
+                xb1 = XB[memory.getByte(pc + 2)]
+                xb2 = XB[memory.getByte(pc + 3)]
                 operand = "%s %s" % (xb1[0], xb2[0])
             elif mode == 'im-ex':
                 if size == 5:
-                    operand = "#$%02X,$%04X" % (data.getByte(pc + 2), (data.getByte(pc + 3) << 8) | (data.getByte(pc + 4)))
+                    operand = "#$%02X,$%04X" % (memory.getByte(pc + 2), (memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4)))
                 elif size == 6:
-                    operand = "#$%04X,$%04X" % (((data.getByte(pc + 2) << 8) |  (data.getByte(pc + 3))), (data.getByte(pc + 4) << 8) | data.getByte(pc + 5))
+                    operand = "#$%04X,$%04X" % (((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | memory.getByte(pc + 5))
                 else:
                     raise NotImplementedError,"???"
             elif mode == 'ex-ex':
-                operand = "$%04X,$%04X" % (((data.getByte(pc + 2) << 8) |  (data.getByte(pc + 3))), (data.getByte(pc + 4) << 8) | (data.getByte(pc + 5)))
+                operand = "$%04X,$%04X" % (((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | (memory.getByte(pc + 5)))
             elif mode == 'id-ex':
-                xb = XB[data.getByte(pc + 2)]
-                operand = "%s $%04X" % (xb[0], ((data.getByte(pc + 3) << 8) | data.getByte(pc + 4)))
+                xb = XB[memory.getByte(pc + 2)]
+                operand = "%s $%04X" % (xb[0], ((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)))
             else:
                 raise NotImplementedError, "Invalid Addressing Mode."
             lhs, rhs = mode.split('-')
@@ -1378,7 +1381,130 @@ def main():
 
     pod.close()
 
+
+class PostbyteDecoder(object):
+    DECODINGs = (
+        (
+            0b11100111,
+            {
+                0b11100011: "sixteenBitOffsetIndexedIndirect",
+                0b11100111: "accuDOffsetIndexedIndirect"
+            }
+        ),
+        (
+            0b11100100,
+            {
+                0b11100100: "accuOffset",
+                0b11100000: "constantOffset"
+            }
+        ),
+        (
+            0b00100000,
+            {
+                0b00100000: "autoPrePostIncDec",
+                0b00000000: "fiveBitConstantOffset"
+            }
+        )
+    )
+
+    RR = ['X', 'Y', 'SP', 'PC']
+    AA = ['A', 'B', 'D']
+
+    instance = None
+    cache = {}
+
+    def __new__(cls):
+        if cls.instance is None:
+            cls.instance = super(PostbyteDecoder, cls).__new__ (cls)
+        return cls.instance
+
+    @classmethod
+    def decode(cls, postbyte):
+        if postbyte in cls.cache:
+            return cls.cache.get(postbyte)
+        else:
+            for decoding, masks in cls.DECODINGs:
+                for match, func_name in masks.items():
+                    if (postbyte & decoding) == match:
+                        func = getattr(cls, func_name)
+                        result = func(postbyte)
+                        return result
+
+    @classmethod
+    def sixteenBitOffsetIndexedIndirect(cls, postbyte):
+        return None
+
+    @classmethod
+    def accuDOffsetIndexedIndirect(cls, postbyte):
+        rr = cls.RR[(postbyte & 0x18) >> 3]
+        return "[D,%s]" % rr
+
+    @classmethod
+    def accuOffset(cls, postbyte):
+        rr = cls.RR[(postbyte & 0x18) >> 3]
+        aa = cls.AA[(postbyte & 0x3)]
+        return "%s,%s" % (aa, rr)
+
+    @classmethod
+    def constantOffset(cls, postbyte):
+        return None
+
+    @classmethod
+    def autoPrePostIncDec(cls, postbyte):
+        rr = cls.RR[(postbyte & 0xc0) >> 6]
+        p = (postbyte & 0x10) >> 4
+        if (postbyte & 0x08) == 0x08:
+            sign = '-'
+            n = 8 - (postbyte & 0x07)
+        else:
+            n = (postbyte & 0x07) + 1
+            sign = '+'
+        if p ==  1:
+            t = '%s%s' % (rr, sign)
+        else:
+            t = '%s%s' % (sign, rr)
+        fmt = "%s,%s" % (n, t)
+        return fmt
+
+    @classmethod
+    def fiveBitConstantOffset(cls, postbyte):
+        rr = cls.RR[(postbyte & 0xc0) >> 6]
+        n = (postbyte & 0x1f)
+        if (n & 0x10) == 0x10:
+            n = - (16 - (n & 0x0f))
+        return "%s,%s" % (n, rr)
+
+
+"Optimized postbyte decoding."
+
+from objutils.SRecords import Reader
+
+
+class Reader0(object):
+    def __init__(self, data):
+        self._data = data
+
+    def __call__(self, addr, len):
+        for data in self._data:
+            if addr >= data.address and addr <= data.address + data.length:
+                a0 = addr - data.address
+                #print data.data[a0 : a0 + len]
+                return data.data[a0 : a0 + len]
+
+def test():
+    hr = Reader(file(r'C:\projekte\csProjects\yOBJl\2CB_12.s19'))
+    data = hr.read()
+
+    r = Reader0(data)
+    memory = CachedMemory(r)
+    
+    disasm(0xf8000, memory)
+
+    p = PostbyteDecoder()
+    for i in range(256):
+        print p.decode(i)
+
+
 if __name__=='__main__':
-    main()
-
-
+    test()
+##    main()
