@@ -28,7 +28,7 @@ __copyright__="""
 
 import abc
 import logging
-#import pyBDM.BDMRegs
+import S12.BDMRegs as BDMRegs
 
 ##
 ##  BMD-Commands.
@@ -62,27 +62,28 @@ GO              = 0x08 # Go to user program.
 TRACE1          = 0x10 # Execute one user instruction then return to BDM.
 TAGGO           = 0x18 # Enable tagging and go to user program.
 
-abstractmethod=abc.abstractmethod
+abstractmethod = abc.abstractmethod
 
 from collections import namedtuple
-MemorySizes=namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
+MemorySizes = namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
 
-logger=logging.getLogger("pyBDM")
-ch=logging.StreamHandler()
+logger = logging.getLogger("pyBDM")
+ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-formatter=logging.Formatter("%(asctime)s - %(name)s[%(levelname)s]: %(message)s","%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter("%(asctime)s - %(name)s[%(levelname)s]: %(message)s","%Y-%m-%d %H:%M:%S")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 class CommunicationError(Exception): pass
 
 class Device(object):
-    __metaclass__=abc.ABCMeta
-    DEVICE_NAME=None
+    __metaclass__= abc.ABCMeta
+    DEVICE_NAME = None
+    VARIABLE_BUS_FREQUENCY = False
 
-    def __init__(self,*args,**kwargs):
-        self.logger=logging.getLogger("pyBDM")
-        super(Device,self).__init__(*args,**kwargs)
+    def __init__(self, *args, **kwargs):
+        self.logger = logging.getLogger("pyBDM")
+        super(Device,self).__init__(*args, **kwargs)
 
     @abstractmethod
     def reset(self):
@@ -106,45 +107,45 @@ class Device(object):
         self.__writeCommand__(TRACE1)
 
 # BDM Firmware Commands.
-    def readBDWord(self,addr):
+    def readBDWord(self, addr):
         self.logger.debug("READ_BD_WORD[0x%04x]" % addr)
-        data=self.__readWord__(READ_BD_WORD,addr)
+        data=self.__readWord__(READ_BD_WORD, addr)
         self.logger.debug("RESULT: 0x%04x" % data)
         return data
 
     def readWord(self,addr):
         self.logger.debug("READ_WORD[0x%04x]" % addr)
-        data=self.__readWord__(READ_WORD,addr)
+        data = self.__readWord__(READ_WORD, addr)
         self.logger.debug("RESULT: 0x%04x" % data)
         return data
 
     def readBDByte(self,addr):
         self.logger.debug("READ_BD_BYTE[0x%04x]" % addr)
-        data=self.__readCommand__(READ_BD_BYTE,1,addr)[0]
+        data = self.__readCommand__(READ_BD_BYTE, 1, addr)[0]
         self.logger.debug("RESULT: 0x%02x" % data)
         return data
 
     def readByte(self,addr):
         self.logger.debug("READ_BYTE[0x%04x]" % addr)
-        data=self.__readCommand__(READ_BYTE,1,addr)[0]
+        data = self.__readCommand__(READ_BYTE, 1, addr)[0]
         self.logger.debug("RESULT: 0x%02x" % data)
         return data
 
     def writeBDWord(self,addr,data):
-        self.logger.debug("WRITE_BD_WORD[0x%04x]=0x%04x" % (addr,data))
-        self.__writeWord__(WRITE_BD_WORD,addr,data)
+        self.logger.debug("WRITE_BD_WORD[0x%04x]=0x%04x" % (addr, data))
+        self.__writeWord__(WRITE_BD_WORD, addr, data)
 
     def writeBDByte(self,addr,data):
-        self.logger.debug("WRITE_BD_BYTE[0x%04x]=0x%02x" % (addr,data))
-        self.__writeByte__(WRITE_BD_BYTE,addr,data)
+        self.logger.debug("WRITE_BD_BYTE[0x%04x]=0x%02x" % (addr, data))
+        self.__writeByte__(WRITE_BD_BYTE,addr, data)
 
     def writeByte(self,addr,data):
-        self.logger.debug("WRITE_BYTE[0x%04x]=0x%02x" % (addr,data))
-        self.__writeByte__(WRITE_BYTE,addr,data)
+        self.logger.debug("WRITE_BYTE[0x%04x]=0x%02x" % (addr, data))
+        self.__writeByte__(WRITE_BYTE, addr, data)
 
     def writeWord(self,addr,data):
-        self.logger.debug("WRITE_WORD[0x%04x]=0x%04x" % (addr,data))
-        self.__writeWord__(WRITE_WORD,addr,data)
+        self.logger.debug("WRITE_WORD[0x%04x]=0x%04x" % (addr, data))
+        self.__writeWord__(WRITE_WORD, addr, data)
 
     def readNext(self):
         self.logger.debug("READ_NEXT")
@@ -152,7 +153,7 @@ class Device(object):
 
     def writeNext(self,data):
         self.logger.debug("WRITE_NEXT[0x%04x]" % data)
-        self.__writeWord__(WRITE_NEXT,data)
+        self.__writeWord__(WRITE_NEXT, data)
 
     def readPC(self):
         self.logger.debug("READ_PC")
@@ -175,65 +176,65 @@ class Device(object):
         return self.__readWord__(READ_SP)
 
     def writePC(self,data):
-        self.logger.debug("WRITE_PC[0x%04x]",data)
-        self.__writeWord__(WRITE_PC,data)
+        self.logger.debug("WRITE_PC[0x%04x]", data)
+        self.__writeWord__(WRITE_PC, data)
 
     def writeD(self,data):
-        self.logger.debug("WRITE_D[0x%04x]",data)
-        self.__writeWord__(WRITE_D,data)
+        self.logger.debug("WRITE_D[0x%04x]", data)
+        self.__writeWord__(WRITE_D, data)
 
     def writeX(self,data):
-        self.logger.debug("WRITE_X[0x%04x]",data)
-        self.__writeWord__(WRITE_X,data)
+        self.logger.debug("WRITE_X[0x%04x]", data)
+        self.__writeWord__(WRITE_X, data)
 
     def writeY(self,data):
-        self.logger.debug("WRITE_Y[0x%04x]",data)
-        self.__writeWord__(WRITE_Y,data)
+        self.logger.debug("WRITE_Y[0x%04x]", data)
+        self.__writeWord__(WRITE_Y, data)
 
     def writeSP(self,data):
-        self.logger.debug("WRITE_SP[0x%04x]",data)
-        self.__writeWord__(WRITE_SP,data)
+        self.logger.debug("WRITE_SP[0x%04x]", data)
+        self.__writeWord__(WRITE_SP, data)
 
 # Convenience Methods.
     def readCCR(self):
-        data=self.readBDByte(0xff06)
+        data = self.readBDByte(BDMRegs.REG_BDM_CCRSAV)
         return data
 
     def writeCCR(self,data):
-        return self.WriteBDByte(0xff06,data)
+        return self.WriteBDByte(BDMRegs.REG_BDM_CCRSAV, data)
 
     def getPartID(self):
-        """Note: the 'classic' HC12-Derivates don't have PartID-Registers! """
+        """Note: the 'classic' HC12 derivates don't have PartID-Registers! """
         return self.readWord(0x001a)
 
     def getMemorySizes(self):
-        """Note: the 'classic' HC12-Derivates don't have MEMSIZE-Registers! """
-        EEP_MAP={0: 0, 1: 2*1024, 2: 4*1024, 3: 8*1024}
-        RAM_MAP={0: 2*1024, 1: 4*1024, 2: 6*1024, 3: 8*1024, 4: 10*1024, 5: 12*1024, 6: 14*1024, 7: 16*1024}
-        ROM_MAP={0: 0*1024, 1: 16*1024, 2: 48*1024, 3: 64*1024}
-        memSize=self.readWord(0x001c)
-        regSpace=(memSize & 0x8000) >> 15
-        if regSpace==1:
-            regSpace=2
+        """Note: the 'classic' HC12 derivates don't have MEMSIZE-Registers! """
+        EEP_MAP = {0: 0, 1: 2*1024, 2: 4*1024, 3: 8*1024}
+        RAM_MAP = {0: 2*1024, 1: 4*1024, 2: 6*1024, 3: 8*1024, 4: 10*1024, 5: 12*1024, 6: 14*1024, 7: 16*1024}
+        ROM_MAP = {0: 0*1024, 1: 16*1024, 2: 48*1024, 3: 64*1024}
+        memSize = self.readWord(0x001c)
+        regSpace = (memSize & 0x8000) >> 15
+        if regSpace == 1:
+            regSpace = 2
         else:
-            regSpace=1
-        regSpace*=1024
+            regSpace = 1
+        regSpace *= 1024
 
-        eepSpace=EEP_MAP[(memSize & 0x3000) >> 12]
-        ramSpace=RAM_MAP[(memSize & 0x0700) >> 8]
-        allocRomSpace=ROM_MAP[(memSize & 0x00C0) >> 6]
-        pageSpace=(memSize & 0x0003)
+        eepSpace = EEP_MAP[(memSize & 0x3000) >> 12]
+        ramSpace = RAM_MAP[(memSize & 0x0700) >> 8]
+        allocRomSpace = ROM_MAP[(memSize & 0x00C0) >> 6]
+        pageSpace = (memSize & 0x0003)
 
-        return MemorySizes(regSpace,eepSpace,ramSpace,allocRomSpace)
+        return MemorySizes(regSpace, eepSpace, ramSpace, allocRomSpace)
 
 
     def readArea(self,addr,length):
         if length == 0:
             return None
-        loops=length / self.MAX_PAYLOAD
+        loops = length / self.MAX_PAYLOAD
         bytesRemaining = length % self.MAX_PAYLOAD
         offset = addr
-        result=bytearray()
+        result = bytearray()
         for l in range(loops):
             self.logger.debug("Reading %u bytes starting @ 0x%04x." % (self.MAX_PAYLOAD, offset))
             data = self.__readArea__(offset, self.MAX_PAYLOAD)
@@ -245,14 +246,10 @@ class Device(object):
             result.extend(data)
         return result
 
-    '''
-    def readArea(self, addr, length):
-
-    '''
     def fillArea(self, addr, value, length):
         if length == 0:
             return
-        loops=length / self.MAX_PAYLOAD
+        loops = length / self.MAX_PAYLOAD
         bytesRemaining = length % self.MAX_PAYLOAD
         offset = addr
         for l in range(loops):
@@ -283,5 +280,4 @@ class Device(object):
         if bytesRemaining:
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
             self.__writeArea__(addrOffset, bytesRemaining, data)
-
 
