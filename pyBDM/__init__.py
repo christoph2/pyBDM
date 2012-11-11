@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import BDM
+import S12
 
 class PodBuilder(object):   pass
