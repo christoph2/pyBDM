@@ -31,6 +31,7 @@ import serial
 import sys
 import types
 
+class PortException(serial.SerialException): pass
 
 class Port(Port.Port):
     def __init__(self,num,baudrate,bytesize=serial.EIGHTBITS,
@@ -48,7 +49,7 @@ class Port(Port.Port):
             self.port=serial.Serial(port=self.num,baudrate=self.baudrate,bytesize=self.bytesize,
                 parity=self.parity,stopbits=self.stopbits,timeout=self.timeout)
         except serial.SerialException,e:
-            raise
+            raise PortException(e)
 
 #        print "OK, openend as '%s' @ %d Bits/Sec." % (self.port.portstr,self.port.baudrate)
 
