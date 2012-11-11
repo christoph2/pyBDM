@@ -48,6 +48,7 @@ def com(v):
 class ComPod12(Device,Serial.Port):
     MAX_PAYLOAD=0xff
     DEVICE_NAME="Elektronik-Laden ComPOD12"
+    VARIABLE_BUS_FREQUENCY = False
 
     def __writeCommand__(self,cmd):
         self.write(cmd)
@@ -136,4 +137,3 @@ class ComPod12(Device,Serial.Port):
             raise NoResponseError
         if (d[0] != com(WRITE_AREA)):
             raise InvalidResponseError
-
