@@ -66,6 +66,18 @@ abstractmethod = abc.abstractmethod
 
 MEMORY_HIGH     = 0xffff
 
+##
+## Interrupt vectors available on every HC(S)12.
+##
+IRQ_VECTOR      = 6
+XIRQ_VECTOR     = 5
+SWI_VECTOR      = 4
+TRAP_VECTOR     = 3
+COP_VECTOR      = 2
+CMF_VECTOR      = 1
+RESET_VECTOR    = 0
+
+
 from collections import namedtuple
 MemorySizes = namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
 
@@ -287,3 +299,26 @@ class Device(object):
         addr = MEMORY_HIGH - (2 * vectorNumber) - 1
         content = self.readWord(addr)
         return content
+
+    def getResetVector(self):
+        return self.getVector(RESET_VECTOR)
+
+    def getCMFVector(self):
+        return self.getVector(CMF_VECTOR)
+
+    def getCOPVector(self):
+        return self.getVector(COP_VECTOR)
+
+    def getTrapVector(self):
+        return self.getVector(TRAP_VECTOR)
+
+    def getSWIVector(self):
+        return self.getVector(SWI_VECTOR)
+
+    def getXIRQVector(self):
+        return self.getVector(XIRQ_VECTOR)
+
+    def getIRQVector(self):
+        return self.getVector(IRQ_VECTOR)
+
+
