@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2011 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -64,6 +64,8 @@ TAGGO           = 0x18 # Enable tagging and go to user program.
 
 abstractmethod = abc.abstractmethod
 
+MEMORY_HIGH     = 0xffff
+
 from collections import namedtuple
 MemorySizes = namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
 
@@ -113,37 +115,37 @@ class Device(object):
         self.logger.debug("RESULT: 0x%04x" % data)
         return data
 
-    def readWord(self,addr):
+    def readWord(self, addr):
         self.logger.debug("READ_WORD[0x%04x]" % addr)
         data = self.__readWord__(READ_WORD, addr)
         self.logger.debug("RESULT: 0x%04x" % data)
         return data
 
-    def readBDByte(self,addr):
+    def readBDByte(self, addr):
         self.logger.debug("READ_BD_BYTE[0x%04x]" % addr)
         data = self.__readCommand__(READ_BD_BYTE, 1, addr)[0]
         self.logger.debug("RESULT: 0x%02x" % data)
         return data
 
-    def readByte(self,addr):
+    def readByte(self, addr):
         self.logger.debug("READ_BYTE[0x%04x]" % addr)
         data = self.__readCommand__(READ_BYTE, 1, addr)[0]
         self.logger.debug("RESULT: 0x%02x" % data)
         return data
 
-    def writeBDWord(self,addr,data):
+    def writeBDWord(self, addr, data):
         self.logger.debug("WRITE_BD_WORD[0x%04x]=0x%04x" % (addr, data))
         self.__writeWord__(WRITE_BD_WORD, addr, data)
 
-    def writeBDByte(self,addr,data):
+    def writeBDByte(self, addr, data):
         self.logger.debug("WRITE_BD_BYTE[0x%04x]=0x%02x" % (addr, data))
         self.__writeByte__(WRITE_BD_BYTE,addr, data)
 
-    def writeByte(self,addr,data):
+    def writeByte(self, addr, data):
         self.logger.debug("WRITE_BYTE[0x%04x]=0x%02x" % (addr, data))
         self.__writeByte__(WRITE_BYTE, addr, data)
 
-    def writeWord(self,addr,data):
+    def writeWord(self, addr, data):
         self.logger.debug("WRITE_WORD[0x%04x]=0x%04x" % (addr, data))
         self.__writeWord__(WRITE_WORD, addr, data)
 
@@ -175,23 +177,23 @@ class Device(object):
         self.logger.debug("READ_SP")
         return self.__readWord__(READ_SP)
 
-    def writePC(self,data):
+    def writePC(self, data):
         self.logger.debug("WRITE_PC[0x%04x]", data)
         self.__writeWord__(WRITE_PC, data)
 
-    def writeD(self,data):
+    def writeD(self, data):
         self.logger.debug("WRITE_D[0x%04x]", data)
         self.__writeWord__(WRITE_D, data)
 
-    def writeX(self,data):
+    def writeX(self, data):
         self.logger.debug("WRITE_X[0x%04x]", data)
         self.__writeWord__(WRITE_X, data)
 
-    def writeY(self,data):
+    def writeY(self, data):
         self.logger.debug("WRITE_Y[0x%04x]", data)
         self.__writeWord__(WRITE_Y, data)
 
-    def writeSP(self,data):
+    def writeSP(self, data):
         self.logger.debug("WRITE_SP[0x%04x]", data)
         self.__writeWord__(WRITE_SP, data)
 
@@ -200,7 +202,7 @@ class Device(object):
         data = self.readBDByte(BDMRegs.REG_BDM_CCRSAV)
         return data
 
-    def writeCCR(self,data):
+    def writeCCR(self, data):
         return self.WriteBDByte(BDMRegs.REG_BDM_CCRSAV, data)
 
     def getPartID(self):
@@ -228,7 +230,7 @@ class Device(object):
         return MemorySizes(regSpace, eepSpace, ramSpace, allocRomSpace)
 
 
-    def readArea(self,addr,length):
+    def readArea(self, addr, length):
         if length == 0:
             return None
         loops = length / self.MAX_PAYLOAD
@@ -281,3 +283,7 @@ class Device(object):
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
             self.__writeArea__(addrOffset, bytesRemaining, data)
 
+    def getVector(self, vectorNumber):
+        addr = MEMORY_HIGH - (2 * vectorNumber) - 1
+        content = self.readWord(addr)
+        return content
