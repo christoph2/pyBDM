@@ -46,8 +46,9 @@ def com(v):
     return 0xff & ~v
 
 class ComPod12(Device,Serial.Port):
-    MAX_PAYLOAD=0xff
-    DEVICE_NAME="Elektronik-Laden ComPOD12"
+    MAX_WRITE_PAYLOAD = 0xff
+    MAX_READ_PAYLOAD = 0x58
+    DEVICE_NAME = "Elektronik-Laden ComPOD12"
     VARIABLE_BUS_FREQUENCY = False
 
     def __writeCommand__(self,cmd):
@@ -114,7 +115,7 @@ class ComPod12(Device,Serial.Port):
         data=self.__readCommand__(VERSION, 2)
         return "%s v%02u.%02u" % (self.DEVICE_NAME,data[0], data[1])
 
-    def __readArea__(self,addr,length):
+    def __readArea__(self, addr, length):
         self.write(READ_AREA)
         self.write((addr >> 8) & 0xff)
         self.write(addr & 0xff)
@@ -123,6 +124,7 @@ class ComPod12(Device,Serial.Port):
         if len(data) == 0:
             raise NoResponseError
         if len(data) != length:
+            print "Expected: %u Actual %u" % (length, len(data))
             raise InvalidResponseError
         return data
 
