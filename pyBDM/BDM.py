@@ -295,7 +295,8 @@ class Device(object):
             dataOffsetTo = dataOffsetFrom + self.MAX_WRITE_PAYLOAD
         if bytesRemaining:
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
-            self.__writeArea__(addrOffset, bytesRemaining, data)
+            slice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
+            self.__writeArea__(addrOffset, bytesRemaining, slice)
 
     def getVector(self, vectorNumber):
         addr = MEMORY_HIGH - (2 * vectorNumber) - 1
