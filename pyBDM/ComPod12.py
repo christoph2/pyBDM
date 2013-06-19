@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2011 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -126,12 +126,12 @@ class ComPod12(Device,Serial.Port):
             raise InvalidResponseError
         return data
 
-    def __writeArea__(self,addr,length,data):
+    def __writeArea__(self, addr, length, data):
         self.write(WRITE_AREA)
         self.write((addr >> 8) & 0xff)
         self.write(addr & 0xff)
         self.write(length)
-        self.write(data)
+        self.write(tuple(data))
         d = self.read(1)
         if d == bytearray():
             raise NoResponseError

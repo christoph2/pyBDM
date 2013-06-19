@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2011 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -34,37 +34,38 @@ import types
 class PortException(serial.SerialException): pass
 
 class Port(Port.Port):
-    def __init__(self,num,baudrate,bytesize=serial.EIGHTBITS,
-        parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,timeout=0.1):
-        self.port=None
-        self.num=num
-        self.baudrate=baudrate
-        self.bytesize=bytesize
-        self.parity=parity
-        self.stopbits=stopbits
-        self.timeout=timeout
+    def __init__(self, num, baudrate, bytesize = serial.EIGHTBITS, parity = serial.PARITY_NONE, stopbits = serial.STOPBITS_ONE,
+            timeout = 0.1):
+        self.port = None
+        self.num = num
+        self.baudrate = baudrate
+        self.bytesize = bytesize
+        self.parity = parity
+        self.stopbits = stopbits
+        self.timeout = timeout
 
     def connect(self):
         try:
-            self.port=serial.Serial(port=self.num,baudrate=self.baudrate,bytesize=self.bytesize,
-                parity=self.parity,stopbits=self.stopbits,timeout=self.timeout)
-        except serial.SerialException,e:
+            self.port = serial.Serial(port = self.num, baudrate = self.baudrate, bytesize = self.bytesize, parity = self.parity,
+                stopbits = self.stopbits, timeout = self.timeout
+            )
+        except serial.SerialException, e:
             raise PortException(e)
 
 #        print "OK, openend as '%s' @ %d Bits/Sec." % (self.port.portstr,self.port.baudrate)
 
     def __del__(self):
-        if self.port and self.port.isOpen()==True:
+        if self.port and self.port.isOpen() == True:
             self.port.close()
 #            print "Closed COM-Port."
 
-    def write(self,data):
-        if not isinstance(data,(types.ListType,types.TupleType)):
-            data=[data]
+    def write(self, data):
+        if not isinstance(data, (types.ListType, types.TupleType)):
+            data = [data]
         self.port.write(bytearray(data))
 
-    def read(self,len):
-        data=self.port.read(len)
+    def read(self, len):
+        data = self.port.read(len)
         return bytearray(data)
 
     def close(self):

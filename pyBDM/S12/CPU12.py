@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2012 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -34,6 +34,10 @@ import sys
 
 from pyBDM.ComPod12 import ComPod12
 
+PAGE2 = 0x18
+
+def makeword(h, l):
+    return ((h & 0xff) << 8) | (l & 0xff)
 
 ##
 ##  Debugger/Disassambler mnemoniction: alternate Mnemonics.
@@ -53,7 +57,7 @@ class Register(object):
 ##
 ## Lomnemonic Primitive Postbyte Encoding.
 ##
-LB={
+LB = {
     0x00 : ("DBEQ", Register.A, '+'),
     0x01 : ("DBEQ", Register.B, '+'),
     0x04 : ("DBEQ", Register.D, '+'),
@@ -300,277 +304,277 @@ EB = {
 ##  Indexed Addressing Mode Postbyte Encoding.
 ##
 XB = {
-    0x00 : ("0,X", "5b const"),
-    0x01 : ("1,X", "5b const"),
-    0x02 : ("2,X", "5b const"),
-    0x03 : ("3,X", "5b const"),
-    0x04 : ("4,X", "5b const"),
-    0x05 : ("5,X", "5b const"),
-    0x06 : ("6,X", "5b const"),
-    0x07 : ("7,X", "5b const"),
-    0x08 : ("8,X", "5b const"),
-    0x09 : ("9,X", "5b const"),
-    0x0a : ("10,X", "5b const"),
-    0x0b : ("11,X", "5b const"),
-    0x0c : ("12,X", "5b const"),
-    0x0d : ("13,X", "5b const"),
-    0x0e : ("14,X", "5b const"),
-    0x0f : ("15,X", "5b const"),
+    0x00 : ("0,X", "5b const", 0),
+    0x01 : ("1,X", "5b const", 0),
+    0x02 : ("2,X", "5b const", 0),
+    0x03 : ("3,X", "5b const", 0),
+    0x04 : ("4,X", "5b const", 0),
+    0x05 : ("5,X", "5b const", 0),
+    0x06 : ("6,X", "5b const", 0),
+    0x07 : ("7,X", "5b const", 0),
+    0x08 : ("8,X", "5b const", 0),
+    0x09 : ("9,X", "5b const", 0),
+    0x0a : ("10,X", "5b const", 0),
+    0x0b : ("11,X", "5b const", 0),
+    0x0c : ("12,X", "5b const", 0),
+    0x0d : ("13,X", "5b const", 0),
+    0x0e : ("14,X", "5b const", 0),
+    0x0f : ("15,X", "5b const", 0),
 
-    0x10 : ("-16,X", "5b const"),
-    0x11 : ("-15,X", "5b const"),
-    0x12 : ("-14,X", "5b const"),
-    0x13 : ("-13,X", "5b const"),
-    0x14 : ("-12,X", "5b const"),
-    0x15 : ("-11,X", "5b const"),
-    0x16 : ("-10,X", "5b const"),
-    0x17 : ("-9,X", "5b const"),
-    0x18 : ("-8,X", "5b const"),
-    0x19 : ("-7,X", "5b const"),
-    0x1a : ("-6,X", "5b const"),
-    0x1b : ("-5,X", "5b const"),
-    0x1c : ("-4,X", "5b const"),
-    0x1d : ("-3,X", "5b const"),
-    0x1e : ("-2,X", "5b const"),
-    0x1f : ("-1,X", "5b const"),
+    0x10 : ("-16,X", "5b const", 0),
+    0x11 : ("-15,X", "5b const", 0),
+    0x12 : ("-14,X", "5b const", 0),
+    0x13 : ("-13,X", "5b const", 0),
+    0x14 : ("-12,X", "5b const", 0),
+    0x15 : ("-11,X", "5b const", 0),
+    0x16 : ("-10,X", "5b const", 0),
+    0x17 : ("-9,X", "5b const", 0),
+    0x18 : ("-8,X", "5b const", 0),
+    0x19 : ("-7,X", "5b const", 0),
+    0x1a : ("-6,X", "5b const", 0),
+    0x1b : ("-5,X", "5b const", 0),
+    0x1c : ("-4,X", "5b const", 0),
+    0x1d : ("-3,X", "5b const", 0),
+    0x1e : ("-2,X", "5b const", 0),
+    0x1f : ("-1,X", "5b const", 0),
 
-    0x20 : ("1,+X", "pre-inc"),
-    0x21 : ("2,+X", "pre-inc"),
-    0x22 : ("3,+X", "pre-inc"),
-    0x23 : ("4,+X", "pre-inc"),
-    0x24 : ("5,+X", "pre-inc"),
-    0x25 : ("6,+X", "pre-inc"),
-    0x26 : ("7,+X", "pre-inc"),
-    0x27 : ("8,+X", "pre-inc"),
-    0x28 : ("8,-X", "pre-dec"),
-    0x29 : ("7,-X", "pre-dec"),
-    0x2a : ("6,-X", "pre-dec"),
-    0x2b : ("5,-X", "pre-dec"),
-    0x2c : ("4,-X", "pre-dec"),
-    0x2d : ("3,-X", "pre-dec"),
-    0x2e : ("2,-X", "pre-dec"),
-    0x2f : ("1,-X", "pre-dec"),
+    0x20 : ("1,+X", "pre-inc", 0),
+    0x21 : ("2,+X", "pre-inc", 0),
+    0x22 : ("3,+X", "pre-inc", 0),
+    0x23 : ("4,+X", "pre-inc", 0),
+    0x24 : ("5,+X", "pre-inc", 0),
+    0x25 : ("6,+X", "pre-inc", 0),
+    0x26 : ("7,+X", "pre-inc", 0),
+    0x27 : ("8,+X", "pre-inc", 0),
+    0x28 : ("8,-X", "pre-dec", 0),
+    0x29 : ("7,-X", "pre-dec", 0),
+    0x2a : ("6,-X", "pre-dec", 0),
+    0x2b : ("5,-X", "pre-dec", 0),
+    0x2c : ("4,-X", "pre-dec", 0),
+    0x2d : ("3,-X", "pre-dec", 0),
+    0x2e : ("2,-X", "pre-dec", 0),
+    0x2f : ("1,-X", "pre-dec", 0),
 
-    0x30 : ("1,X+", "post-inc"),
-    0x31 : ("2,X+", "post-inc"),
-    0x32 : ("3,X+", "post-inc"),
-    0x33 : ("4,X+", "post-inc"),
-    0x34 : ("5,X+", "post-inc"),
-    0x35 : ("6,X+", "post-inc"),
-    0x36 : ("7,X+", "post-inc"),
-    0x37 : ("8,X+", "post-inc"),
-    0x38 : ("8,X-", "post-dec"),
-    0x39 : ("7,X-", "post-dec"),
-    0x3a : ("6,X-", "post-dec"),
-    0x3b : ("5,X-", "post-dec"),
-    0x3c : ("4,X-", "post-dec"),
-    0x3d : ("3,X-", "post-dec"),
-    0x3e : ("2,X-", "post-dec"),
-    0x3f : ("1,X-", "post-dec"),
+    0x30 : ("1,X+", "post-inc", 0),
+    0x31 : ("2,X+", "post-inc", 0),
+    0x32 : ("3,X+", "post-inc", 0),
+    0x33 : ("4,X+", "post-inc", 0),
+    0x34 : ("5,X+", "post-inc", 0),
+    0x35 : ("6,X+", "post-inc", 0),
+    0x36 : ("7,X+", "post-inc", 0),
+    0x37 : ("8,X+", "post-inc", 0),
+    0x38 : ("8,X-", "post-dec", 0),
+    0x39 : ("7,X-", "post-dec", 0),
+    0x3a : ("6,X-", "post-dec", 0),
+    0x3b : ("5,X-", "post-dec", 0),
+    0x3c : ("4,X-", "post-dec", 0),
+    0x3d : ("3,X-", "post-dec", 0),
+    0x3e : ("2,X-", "post-dec", 0),
+    0x3f : ("1,X-", "post-dec", 0),
 
-    0x40 : ("0,Y", "5b const"),
-    0x41 : ("1,Y", "5b const"),
-    0x42 : ("2,Y", "5b const"),
-    0x43 : ("3,Y", "5b const"),
-    0x44 : ("4,Y", "5b const"),
-    0x45 : ("5,Y", "5b const"),
-    0x46 : ("6,Y", "5b const"),
-    0x47 : ("7,Y", "5b const"),
-    0x48 : ("8,Y", "5b const"),
-    0x49 : ("9,Y", "5b const"),
-    0x4a : ("10,Y", "5b const"),
-    0x4b : ("11,Y", "5b const"),
-    0x4c : ("12,Y", "5b const"),
-    0x4d : ("13,Y", "5b const"),
-    0x4e : ("14,Y", "5b const"),
-    0x4f : ("15,Y", "5b const"),
+    0x40 : ("0,Y", "5b const", 0),
+    0x41 : ("1,Y", "5b const", 0),
+    0x42 : ("2,Y", "5b const", 0),
+    0x43 : ("3,Y", "5b const", 0),
+    0x44 : ("4,Y", "5b const", 0),
+    0x45 : ("5,Y", "5b const", 0),
+    0x46 : ("6,Y", "5b const", 0),
+    0x47 : ("7,Y", "5b const", 0),
+    0x48 : ("8,Y", "5b const", 0),
+    0x49 : ("9,Y", "5b const", 0),
+    0x4a : ("10,Y", "5b const", 0),
+    0x4b : ("11,Y", "5b const", 0),
+    0x4c : ("12,Y", "5b const", 0),
+    0x4d : ("13,Y", "5b const", 0),
+    0x4e : ("14,Y", "5b const", 0),
+    0x4f : ("15,Y", "5b const", 0),
 
-    0x50 : ("-16,Y", "5b const"),
-    0x51 : ("-15,Y", "5b const"),
-    0x52 : ("-14,Y", "5b const"),
-    0x53 : ("-13,Y", "5b const"),
-    0x54 : ("-12,Y", "5b const"),
-    0x55 : ("-11,Y", "5b const"),
-    0x56 : ("-10,Y", "5b const"),
-    0x57 : ("-9,Y", "5b const"),
-    0x58 : ("-8,Y", "5b const"),
-    0x59 : ("-7,Y", "5b const"),
-    0x5a : ("-6,Y", "5b const"),
-    0x5b : ("-5,Y", "5b const"),
-    0x5c : ("-4,Y", "5b const"),
-    0x5d : ("-3,Y", "5b const"),
-    0x5e : ("-3,Y", "5b const"),
-    0x5f : ("-1,Y", "5b const"),
+    0x50 : ("-16,Y", "5b const", 0),
+    0x51 : ("-15,Y", "5b const", 0),
+    0x52 : ("-14,Y", "5b const", 0),
+    0x53 : ("-13,Y", "5b const", 0),
+    0x54 : ("-12,Y", "5b const", 0),
+    0x55 : ("-11,Y", "5b const", 0),
+    0x56 : ("-10,Y", "5b const", 0),
+    0x57 : ("-9,Y", "5b const", 0),
+    0x58 : ("-8,Y", "5b const", 0),
+    0x59 : ("-7,Y", "5b const", 0),
+    0x5a : ("-6,Y", "5b const", 0),
+    0x5b : ("-5,Y", "5b const", 0),
+    0x5c : ("-4,Y", "5b const", 0),
+    0x5d : ("-3,Y", "5b const", 0),
+    0x5e : ("-3,Y", "5b const", 0),
+    0x5f : ("-1,Y", "5b const", 0),
 
-    0x60 : ("1,+Y", "pre-inc"),
-    0x61 : ("2,+Y", "pre-inc"),
-    0x62 : ("3,+Y", "pre-inc"),
-    0x63 : ("4,+Y", "pre-inc"),
-    0x64 : ("5,+Y", "pre-inc"),
-    0x65 : ("6,+Y", "pre-inc"),
-    0x66 : ("7,+Y", "pre-inc"),
-    0x67 : ("8,+Y", "pre-inc"),
-    0x68 : ("8,-Y", "pre-dec"),
-    0x69 : ("7,-Y", "pre-dec"),
-    0x6a : ("6,-Y", "pre-dec"),
-    0x6b : ("5,-Y", "pre-dec"),
-    0x6c : ("4,-Y", "pre-dec"),
-    0x6d : ("3,-Y", "pre-dec"),
-    0x6e : ("2,-Y", "pre-dec"),
-    0x6f : ("1,-Y", "pre-dec"),
+    0x60 : ("1,+Y", "pre-inc", 0),
+    0x61 : ("2,+Y", "pre-inc", 0),
+    0x62 : ("3,+Y", "pre-inc", 0),
+    0x63 : ("4,+Y", "pre-inc", 0),
+    0x64 : ("5,+Y", "pre-inc", 0),
+    0x65 : ("6,+Y", "pre-inc", 0),
+    0x66 : ("7,+Y", "pre-inc", 0),
+    0x67 : ("8,+Y", "pre-inc", 0),
+    0x68 : ("8,-Y", "pre-dec", 0),
+    0x69 : ("7,-Y", "pre-dec", 0),
+    0x6a : ("6,-Y", "pre-dec", 0),
+    0x6b : ("5,-Y", "pre-dec", 0),
+    0x6c : ("4,-Y", "pre-dec", 0),
+    0x6d : ("3,-Y", "pre-dec", 0),
+    0x6e : ("2,-Y", "pre-dec", 0),
+    0x6f : ("1,-Y", "pre-dec", 0),
 
-    0x70 : ("1,Y+", "post-inc"),
-    0x71 : ("2,Y+", "post-inc"),
-    0x72 : ("3,Y+", "post-inc"),
-    0x73 : ("4,Y+", "post-inc"),
-    0x74 : ("5,Y+", "post-inc"),
-    0x75 : ("6,Y+", "post-inc"),
-    0x76 : ("7,Y+", "post-inc"),
-    0x77 : ("8,Y+", "post-inc"),
-    0x78 : ("8,Y-", "post-dec"),
-    0x79 : ("7,Y-", "post-dec"),
-    0x7a : ("6,Y-", "post-dec"),
-    0x7b : ("5,Y-", "post-dec"),
-    0x7c : ("4,Y-", "post-dec"),
-    0x7d : ("3,Y-", "post-dec"),
-    0x7e : ("2,Y-", "post-dec"),
-    0x7f : ("1,Y-", "post-dec"),
+    0x70 : ("1,Y+", "post-inc", 0),
+    0x71 : ("2,Y+", "post-inc", 0),
+    0x72 : ("3,Y+", "post-inc", 0),
+    0x73 : ("4,Y+", "post-inc", 0),
+    0x74 : ("5,Y+", "post-inc", 0),
+    0x75 : ("6,Y+", "post-inc", 0),
+    0x76 : ("7,Y+", "post-inc", 0),
+    0x77 : ("8,Y+", "post-inc", 0),
+    0x78 : ("8,Y-", "post-dec", 0),
+    0x79 : ("7,Y-", "post-dec", 0),
+    0x7a : ("6,Y-", "post-dec", 0),
+    0x7b : ("5,Y-", "post-dec", 0),
+    0x7c : ("4,Y-", "post-dec", 0),
+    0x7d : ("3,Y-", "post-dec", 0),
+    0x7e : ("2,Y-", "post-dec", 0),
+    0x7f : ("1,Y-", "post-dec", 0),
 
-    0x80 : ("0,SP", "5b const"),
-    0x81 : ("1,SP", "5b const"),
-    0x82 : ("2,SP", "5b const"),
-    0x83 : ("3,SP", "5b const"),
-    0x84 : ("4,SP", "5b const"),
-    0x85 : ("5,SP", "5b const"),
-    0x86 : ("6,SP", "5b const"),
-    0x87 : ("7,SP", "5b const"),
-    0x88 : ("8,SP", "5b const"),
-    0x89 : ("9,SP", "5b const"),
-    0x8a : ("10,SP", "5b const"),
-    0x8b : ("11,SP", "5b const"),
-    0x8c : ("12,SP", "5b const"),
-    0x8d : ("13,SP", "5b const"),
-    0x8e : ("14,SP", "5b const"),
-    0x8f : ("15,SP", "5b const"),
+    0x80 : ("0,SP", "5b const", 0),
+    0x81 : ("1,SP", "5b const", 0),
+    0x82 : ("2,SP", "5b const", 0),
+    0x83 : ("3,SP", "5b const", 0),
+    0x84 : ("4,SP", "5b const", 0),
+    0x85 : ("5,SP", "5b const", 0),
+    0x86 : ("6,SP", "5b const", 0),
+    0x87 : ("7,SP", "5b const", 0),
+    0x88 : ("8,SP", "5b const", 0),
+    0x89 : ("9,SP", "5b const", 0),
+    0x8a : ("10,SP", "5b const", 0),
+    0x8b : ("11,SP", "5b const", 0),
+    0x8c : ("12,SP", "5b const", 0),
+    0x8d : ("13,SP", "5b const", 0),
+    0x8e : ("14,SP", "5b const", 0),
+    0x8f : ("15,SP", "5b const", 0),
 
-    0x90 : ("-16,SP", "5b const"),
-    0x91 : ("-15,SP", "5b const"),
-    0x92 : ("-14,SP", "5b const"),
-    0x93 : ("-13,SP", "5b const"),
-    0x94 : ("-12,SP", "5b const"),
-    0x95 : ("-11,SP", "5b const"),
-    0x96 : ("-10,SP", "5b const"),
-    0x97 : ("-9,SP", "5b const"),
-    0x98 : ("-8,SP", "5b const"),
-    0x99 : ("-7,SP", "5b const"),
-    0x9a : ("-6,SP", "5b const"),
-    0x9b : ("-5,SP", "5b const"),
-    0x9c : ("-4,SP", "5b const"),
-    0x9d : ("-3,SP", "5b const"),
-    0x9e : ("-2,SP", "5b const"),
-    0x9f : ("-1,SP", "5b const"),
+    0x90 : ("-16,SP", "5b const", 0),
+    0x91 : ("-15,SP", "5b const", 0),
+    0x92 : ("-14,SP", "5b const", 0),
+    0x93 : ("-13,SP", "5b const", 0),
+    0x94 : ("-12,SP", "5b const", 0),
+    0x95 : ("-11,SP", "5b const", 0),
+    0x96 : ("-10,SP", "5b const", 0),
+    0x97 : ("-9,SP", "5b const", 0),
+    0x98 : ("-8,SP", "5b const", 0),
+    0x99 : ("-7,SP", "5b const", 0),
+    0x9a : ("-6,SP", "5b const", 0),
+    0x9b : ("-5,SP", "5b const", 0),
+    0x9c : ("-4,SP", "5b const", 0),
+    0x9d : ("-3,SP", "5b const", 0),
+    0x9e : ("-2,SP", "5b const", 0),
+    0x9f : ("-1,SP", "5b const", 0),
 
-    0xa0 : ("1,+SP", "pre-inc"),
-    0xa1 : ("2,+SP", "pre-inc"),
-    0xa2 : ("3,+SP", "pre-inc"),
-    0xa3 : ("4,+SP", "pre-inc"),
-    0xa4 : ("5,+SP", "pre-inc"),
-    0xa5 : ("6,+SP", "pre-inc"),
-    0xa6 : ("7,+SP", "pre-inc"),
-    0xa7 : ("8,+SP", "pre-inc"),
-    0xa8 : ("8,-SP", "pre-dec"),
-    0xa9 : ("7,-SP", "pre-dec"),
-    0xaa : ("6,-SP", "pre-dec"),
-    0xab : ("5,-SP", "pre-dec"),
-    0xac : ("4,-SP", "pre-dec"),
-    0xad : ("3,-SP", "pre-dec"),
-    0xae : ("2,-SP", "pre-dec"),
-    0xaf : ("1,-SP", "pre-dec"),
+    0xa0 : ("1,+SP", "pre-inc", 0),
+    0xa1 : ("2,+SP", "pre-inc", 0),
+    0xa2 : ("3,+SP", "pre-inc", 0),
+    0xa3 : ("4,+SP", "pre-inc", 0),
+    0xa4 : ("5,+SP", "pre-inc", 0),
+    0xa5 : ("6,+SP", "pre-inc", 0),
+    0xa6 : ("7,+SP", "pre-inc", 0),
+    0xa7 : ("8,+SP", "pre-inc", 0),
+    0xa8 : ("8,-SP", "pre-dec", 0),
+    0xa9 : ("7,-SP", "pre-dec", 0),
+    0xaa : ("6,-SP", "pre-dec", 0),
+    0xab : ("5,-SP", "pre-dec", 0),
+    0xac : ("4,-SP", "pre-dec", 0),
+    0xad : ("3,-SP", "pre-dec", 0),
+    0xae : ("2,-SP", "pre-dec", 0),
+    0xaf : ("1,-SP", "pre-dec", 0),
 
-    0xb0 : ("1,SP+", "post-inc"),
-    0xb1 : ("2,SP+", "post-inc"),
-    0xb2 : ("3,SP+", "post-inc"),
-    0xb3 : ("4,SP+", "post-inc"),
-    0xb4 : ("5,SP+", "post-inc"),
-    0xb5 : ("6,SP+", "post-inc"),
-    0xb6 : ("7,SP+", "post-inc"),
-    0xb7 : ("8,SP+", "post-inc"),
-    0xb8 : ("8,SP-", "post-dec"),
-    0xb9 : ("7,SP-", "post-dec"),
-    0xba : ("6,SP-", "post-dec"),
-    0xbb : ("5,SP-", "post-dec"),
-    0xbc : ("4,SP-", "post-dec"),
-    0xbd : ("3,SP-", "post-dec"),
-    0xbe : ("2,SP-", "post-dec"),
-    0xbf : ("1,SP-", "post-dec"),
+    0xb0 : ("1,SP+", "post-inc", 0),
+    0xb1 : ("2,SP+", "post-inc", 0),
+    0xb2 : ("3,SP+", "post-inc", 0),
+    0xb3 : ("4,SP+", "post-inc", 0),
+    0xb4 : ("5,SP+", "post-inc", 0),
+    0xb5 : ("6,SP+", "post-inc", 0),
+    0xb6 : ("7,SP+", "post-inc", 0),
+    0xb7 : ("8,SP+", "post-inc", 0),
+    0xb8 : ("8,SP-", "post-dec", 0),
+    0xb9 : ("7,SP-", "post-dec", 0),
+    0xba : ("6,SP-", "post-dec", 0),
+    0xbb : ("5,SP-", "post-dec", 0),
+    0xbc : ("4,SP-", "post-dec", 0),
+    0xbd : ("3,SP-", "post-dec", 0),
+    0xbe : ("2,SP-", "post-dec", 0),
+    0xbf : ("1,SP-", "post-dec", 0),
 
-    0xc0 : ("0,PC", "5b const"),
-    0xc1 : ("1,PC", "5b const"),
-    0xc2 : ("2,PC", "5b const"),
-    0xc3 : ("3,PC", "5b const"),
-    0xc4 : ("4,PC", "5b const"),
-    0xc5 : ("5,PC", "5b const"),
-    0xc6 : ("6,PC", "5b const"),
-    0xc7 : ("7,PC", "5b const"),
-    0xc8 : ("8,PC", "5b const"),
-    0xc9 : ("9,PC", "5b const"),
-    0xca : ("10,PC", "5b const"),
-    0xcb : ("11,PC", "5b const"),
-    0xcc : ("12,PC", "5b const"),
-    0xcd : ("13,PC", "5b const"),
-    0xce : ("14,PC", "5b const"),
-    0xcf : ("15,PC", "5b const"),
+    0xc0 : ("0,PC", "5b const", 0),
+    0xc1 : ("1,PC", "5b const", 0),
+    0xc2 : ("2,PC", "5b const", 0),
+    0xc3 : ("3,PC", "5b const", 0),
+    0xc4 : ("4,PC", "5b const", 0),
+    0xc5 : ("5,PC", "5b const", 0),
+    0xc6 : ("6,PC", "5b const", 0),
+    0xc7 : ("7,PC", "5b const", 0),
+    0xc8 : ("8,PC", "5b const", 0),
+    0xc9 : ("9,PC", "5b const", 0),
+    0xca : ("10,PC", "5b const", 0),
+    0xcb : ("11,PC", "5b const", 0),
+    0xcc : ("12,PC", "5b const", 0),
+    0xcd : ("13,PC", "5b const", 0),
+    0xce : ("14,PC", "5b const", 0),
+    0xcf : ("15,PC", "5b const", 0),
 
-    0xd0 : ("-16,PC", "5b const"),
-    0xd1 : ("-15,PC", "5b const"),
-    0xd2 : ("-14,PC", "5b const"),
-    0xd3 : ("-13,PC", "5b const"),
-    0xd4 : ("-12,PC", "5b const"),
-    0xd5 : ("-11,PC", "5b const"),
-    0xd6 : ("-10,PC", "5b const"),
-    0xd7 : ("-9,PC", "5b const"),
-    0xd8 : ("-8,PC", "5b const"),
-    0xd9 : ("-7,PC", "5b const"),
-    0xda : ("-6,PC", "5b const"),
-    0xdb : ("-5,PC", "5b const"),
-    0xdc : ("-4,PC", "5b const"),
-    0xdd : ("-3,PC", "5b const"),
-    0xde : ("-2,PC", "5b const"),
-    0xdf : ("-1,PC", "5b const"),
+    0xd0 : ("-16,PC", "5b const", 0),
+    0xd1 : ("-15,PC", "5b const", 0),
+    0xd2 : ("-14,PC", "5b const", 0),
+    0xd3 : ("-13,PC", "5b const", 0),
+    0xd4 : ("-12,PC", "5b const", 0),
+    0xd5 : ("-11,PC", "5b const", 0),
+    0xd6 : ("-10,PC", "5b const", 0),
+    0xd7 : ("-9,PC", "5b const", 0),
+    0xd8 : ("-8,PC", "5b const", 0),
+    0xd9 : ("-7,PC", "5b const", 0),
+    0xda : ("-6,PC", "5b const", 0),
+    0xdb : ("-5,PC", "5b const", 0),
+    0xdc : ("-4,PC", "5b const", 0),
+    0xdd : ("-3,PC", "5b const", 0),
+    0xde : ("-2,PC", "5b const", 0),
+    0xdf : ("-1,PC", "5b const", 0),
 
-    0xe0 : ("%s,X", "9b const"),
-    0xe1 : ("-%s,X", "9b const"),
-    0xe2 : ("%s,X", "16b const"),
-    0xe3 : ("[%s,X]", "16b indr"),
-    0xe4 : ("A,X", "A offset"),
-    0xe5 : ("B,X", "B offset"),
-    0xe6 : ("D,X", "D offset"),
-    0xe7 : ("[D,X]", "D indr"),
-    0xe8 : ("%s,Y", "9b const"),
-    0xe9 : ("-%s,Y", "9b const"),
-    0xea : ("%s,Y", "16b const"),
-    0xeb : ("[%s,Y]", "16b indr"),
-    0xec : ("A,Y", "A offset"),
-    0xed : ("B,Y", "B offset"),
-    0xee : ("D,Y", "D offset"),
-    0xef : ("[D,Y]", "D indr"),
+    0xe0 : ("%s,X", "9b const", 1),
+    0xe1 : ("-%s,X", "9b const", 1),
+    0xe2 : ("%s,X", "16b const", 2),
+    0xe3 : ("[%s,X]", "16b indr", 2),
+    0xe4 : ("A,X", "A offset", 0),
+    0xe5 : ("B,X", "B offset", 0),
+    0xe6 : ("D,X", "D offset", 0),
+    0xe7 : ("[D,X]", "D indr", 0),
+    0xe8 : ("%s,Y", "9b const", 1),
+    0xe9 : ("-%s,Y", "9b const", 1),
+    0xea : ("%s,Y", "16b const", 2),
+    0xeb : ("[%s,Y]", "16b indr", 2),
+    0xec : ("A,Y", "A offset", 0),
+    0xed : ("B,Y", "B offset", 0),
+    0xee : ("D,Y", "D offset", 0),
+    0xef : ("[D,Y]", "D indr", 0),
 
-    0xf0 : ("%s,SP", "9b const"),
-    0xf1 : ("-%s,SP", "9b const"),
-    0xf2 : ("%s,SP", "16b const"),
-    0xf3 : ("[%s,SP]", "16b indr"),
-    0xf4 : ("A,SP", "A offset"),
-    0xf5 : ("B,SP", "B offset"),
-    0xf6 : ("D,SP", "D offset"),
-    0xf7 : ("[D,SP]", "D indr"),
-    0xf8 : ("%s,PC", "9b const"),
-    0xf9 : ("-%s,PC", "9b const"),
-    0xfa : ("%s,PC", "16 const"),   # check: 16b const???
-    0xfb : ("[%s,PC]", "16b indr"),
-    0xfc : ("A,PC", "A offset"),
-    0xfd : ("B,PC", "B offset"),
-    0xfe : ("D,PC", "D offset"),
-    0xff : ("[D,PC]", "D indr"),
+    0xf0 : ("%s,SP", "9b const", 1),
+    0xf1 : ("-%s,SP", "9b const", 1),
+    0xf2 : ("%s,SP", "16b const", 2),
+    0xf3 : ("[%s,SP]", "16b indr", 2),
+    0xf4 : ("A,SP", "A offset", 0),
+    0xf5 : ("B,SP", "B offset", 0),
+    0xf6 : ("D,SP", "D offset", 0),
+    0xf7 : ("[D,SP]", "D indr", 0),
+    0xf8 : ("%s,PC", "9b const", 1),
+    0xf9 : ("-%s,PC", "9b const", 1),
+    0xfa : ("%s,PC", "16 const", 2),   # check: 16b const???
+    0xfb : ("[%s,PC]", "16b indr", 2),
+    0xfc : ("A,PC", "A offset", 0),
+    0xfd : ("B,PC", "B offset", 0),
+    0xfe : ("D,PC", "D offset", 0),
+    0xff : ("[D,PC]", "D indr", 0),
 }
 
 # AdressingMode
@@ -1155,6 +1159,15 @@ class CachedMemory(object):
             #print map(hex,memory)
         return self.cache[page][offset]
 
+
+    def getByteRange(self, addressFrom, addressTo):
+        if addressFrom > addressTo:
+            raise ValueError("addressFrom greater then addressTo")
+        result = []
+        for idx in range(addressFrom, addressTo):
+            result.append(self.getByte(idx))
+        return result
+
     def getWord(self, address):
         if (address & 0x0001) == 0x0001:
             raise AlignmentError, "Address must be word aligned."
@@ -1188,13 +1201,165 @@ class CachedMemory(object):
             self.cache.pop(address)
 
 
-tfrOrExg = lambda postbyte: postbyte>=0x80 and 'EXG' or 'TFR'
+tfrOrExg = lambda postbyte: postbyte >= 0x80 and 'EXG' or 'TFR'
 isBitFunction = lambda fn: fn in ('BSET', 'BCLR')
 isBitBranchFunction = lambda fn: fn in ('BRSET', 'BRCLR')
+isMoveFunction = lambda fn: fn in ('MOVB', 'MOVW')
 
+
+def signedByte(value):
+    if value >= 0x80: # todo: Factor out!!!
+        value = -((~value & 0xff) + 1)
+    return value
 
 # 0x4320 20 -- LBRA 0x4342 eigentlich 43B1!?
 # 0x570D 63 -- DEC  7,PC    must be: 0x570D 63C7 DEC     5716,PCR
+
+class Decoding(object):
+    def __init__(self, opcode, mnemonic, mode, totalSize, page2, bytes, rawBytes):
+        self.opcode = opcode
+        self.mnemonic = mnemonic
+        self.totalSize = totalSize
+        self.page2 = page2
+        self.mode = mode
+        self.bytes = bytes
+        self.rawBytes = rawBytes
+
+
+def preDecode(addr, mem):
+    """Figures out the total length of bytes following."""
+
+    decoder = PostbyteDecoder()
+    if mem.getByte(addr + 0) == PAGE2:
+        idx = 1
+        map = opcodeMapPage2
+        page2 = True
+    else:
+        idx = 0
+        map = opcodeMapPage1
+        page2 = False
+    opcode = mem.getByte(addr + idx)
+    mnemonic, cycles, mode, size = map.get(opcode, None)
+    if mode == ID:
+        # Size depends on indexing mode.
+        _, _, byteCount = XB.get(mem.getByte(addr + 1 + idx))
+        fmt = decoder.decode(mem.getByte(addr + 1 + idx))
+        totalSize = byteCount + idx + 2
+    else:
+        totalSize = size
+    if isBitFunction(mnemonic):
+        pass # totalSize += 1
+    elif isBitBranchFunction(mnemonic):
+        pass #totalSize += 2
+    rawBytes = mem.getByteRange(addr, addr + totalSize)
+    return Decoding(opcode, mnemonic, mode, totalSize, page2, mem.getByteRange(addr + 1 + idx, addr + totalSize), rawBytes)
+
+
+def decodeMove(deco):
+    operand = ""
+    mode = deco.mode
+    bytes = deco.bytes
+    if 0x08 <= deco.opcode <= 0x0d:     # MOVB
+        if mode == 'im-id':
+            idDest = bytes[0]
+            imm = bytes[1]
+        elif mode == 'ex-id':
+            idDest = bytes[0]
+            ext = makeword(bytes[1], bytes[2])
+        elif mode == 'id-id':
+            idDest = bytes[0]
+            idSrc = bytes[1]
+        elif mode == 'im-ex':
+            imm = bytes[0]
+            ext = makeword(bytes[1], bytes[2])
+            operand = "#$%02X, $%04X" % (imm, ext)
+        elif mode == 'ex-ex':
+            extDest = makeword(bytes[0], bytes[1])
+            extSrc = makeword(bytes[2], bytes[3])
+            operand = "$%04X, $%04X" % (extSrc, extDest)
+        elif mode == 'id-ex':
+            idSrc = bytes[0]
+            ext = makeword(bytes[1], bytes[2])
+    elif 0x00 <= deco.opcode <= 0x05:   # MOVW
+        if mode == 'im-id':
+            idDest = bytes[0]
+            imm = makeword(bytes[1], bytes[2])
+        elif mode == 'ex-id':
+            idDest = bytes[0]
+            ext = makeword(bytes[1], bytes[2])
+        elif mode == 'id-id':
+            idDest = bytes[0]
+            idSrc = bytes[1]
+        elif mode == 'im-ex':
+            imm = makeword(bytes[0], bytes[1])
+            ext = makeword(bytes[2], bytes[3])
+            operand = "#$%04X, $%04X" % (imm, ext)
+        elif mode == 'ex-ex':
+            extDest = makeword(bytes[0], bytes[1])
+            extSrc = makeword(bytes[2], bytes[3])
+            operand = "$%04X, $%04X" % (extSrc, extDest)
+        elif mode == 'id-ex':
+            idSrc = bytes[0]
+            ext = makeword(bytes[1], bytes[2])
+    return operand
+
+
+def dis2(addressFrom, addressTo, memory):
+    pc = addressFrom
+    while pc <= addressTo:
+        operand = ''
+        deco = preDecode(pc, memory)
+        if deco.mnemonic == '*tfr/exg*':
+            deco.mnemonic = "%s" % ("TFR" if deco.bytes[0] <= 0x80 else "EXG")
+            operand = "%s" % (EB[deco.bytes[0]])
+        if deco.mode == IH:
+            pass
+        elif deco.mode == SPECIAL:
+            pass
+        elif  deco.mode == IM:
+            if deco.totalSize == 2:
+                operand = '#$%02X' % deco.bytes[0]
+            elif deco.totalSize == 3:
+                operand = '#$%04X' % ((deco.bytes[0] << 8) | deco.bytes[1],)
+        elif deco.mode == DI:
+            operand = '$%02X' % (deco.bytes[0])
+        elif deco.mode == EX:
+            if isBitFunction(deco.mnemonic):
+                operand = '$%04X #$%02X' % ((deco.bytes[0] << 8) | deco.bytes[1], deco.bytes[2])
+            elif isBitBranchFunction(deco.mnemonic):
+                rel = signedByte(deco.bytes[3])
+                operand = "$%04X, #$%02X, $%04X" % ((deco.bytes[0] << 8) | deco.bytes[1], deco.bytes[2],  (pc + 5 + rel))
+            else:
+                operand = '$%04X' % ((deco.bytes[0] << 8) | deco.bytes[1],)
+        elif deco.mode == ID:
+            pass
+        elif deco.mode == RL:
+            if deco.opcode == LOOP:
+                try:
+                    lb = LB[deco.bytes[0]] # DBNE    Y,467B     0436FC
+                    rel = signedByte(deco.bytes[1])
+
+                    operand = "%s,$%04X" % (lb[1], (pc + 2 + rel))
+                    mnemonic = lb[0]
+                except:
+                    mnemonic = "TRAP"
+                    operand = "($%02x $%02x)" % (deco.opcode, deco.bytes[0])
+                deco.mnemonic = mnemonic
+            else:
+                rel = signedByte(deco.bytes[0])
+                operand = "0x%04X" % (pc + 2 + rel)
+        elif isMoveFunction(deco.mnemonic):
+            operand = decodeMove(deco)
+        elif deco.mnemonic == 'CALL':
+            pass
+        else:
+            pass
+
+        print "0x%04X " % (pc, ),
+        for b in deco.rawBytes:
+            print "%02X" % (b, ),
+        print "-- %s\t%s" % (deco.mnemonic, operand)
+        pc += deco.totalSize
 
 
 def disasm(addr, memory):
@@ -1376,7 +1541,7 @@ def main():
 #    pod.targetGo()
 
     #disasm(resetVec, memory)
-    disasm(16386, memory)
+    #disasm(16386, memory)
 
 
     pod.close()
@@ -1432,7 +1597,8 @@ class PostbyteDecoder(object):
 
     @classmethod
     def sixteenBitOffsetIndexedIndirect(cls, postbyte):
-        return None
+        rr = cls.RR[(postbyte & 0x18) >> 3]
+        return "[%%s,%s]" % (rr, )
 
     @classmethod
     def accuDOffsetIndexedIndirect(cls, postbyte):
@@ -1447,7 +1613,11 @@ class PostbyteDecoder(object):
 
     @classmethod
     def constantOffset(cls, postbyte):
-        return None
+        rr = cls.RR[(postbyte & 0x18) >> 3]
+        z = (postbyte & 0x02) >> 1
+        s= postbyte & 0x01
+        sign = "-" if postbyte & 0x01 else ""
+        return "%s%%s,%s" % (sign, rr, )
 
     @classmethod
     def autoPrePostIncDec(cls, postbyte):
@@ -1492,13 +1662,15 @@ class Reader0(object):
                 return data.data[a0 : a0 + len]
 
 def test():
+    pd = preDecode(0x0000, [0x1a, 0xe5, 0x19, 0xed, 0x18, 0x06])
+
     hr = Reader(file(r'C:\projekte\csProjects\yOBJl\2CB_12.s19'))
     data = hr.read()
 
     r = Reader0(data)
     memory = CachedMemory(r)
     
-    disasm(0xf8000, memory)
+    ## disasm(0xf8000, memory)
 
     p = PostbyteDecoder()
     for i in range(256):
@@ -1506,5 +1678,6 @@ def test():
 
 
 if __name__=='__main__':
-    test()
+    #test()
+    pass
 ##    main()

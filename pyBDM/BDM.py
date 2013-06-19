@@ -209,7 +209,9 @@ class Device(object):
         self.logger.debug("WRITE_SP[0x%04x]", data)
         self.__writeWord__(WRITE_SP, data)
 
-# Convenience Methods.
+##
+## Convenience Methods.
+##
     def readCCR(self):
         data = self.readBDByte(BDMRegs.REG_BDM_CCRSAV)
         return data
