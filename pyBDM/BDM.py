@@ -78,6 +78,8 @@ CMF_VECTOR      = 1
 RESET_VECTOR    = 0
 
 
+PPAGE           = 0x30
+
 from collections import namedtuple
 MemorySizes = namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
 
@@ -297,6 +299,12 @@ class Device(object):
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
             slice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
             self.__writeArea__(addrOffset, bytesRemaining, slice)
+
+    def getPPage(self):
+        return self.readBDByte(PPAGE)
+
+    def setPPage(self, value):
+        self.writeBDByte(PPAGE, value)
 
     def getVector(self, vectorNumber):
         addr = MEMORY_HIGH - (2 * vectorNumber) - 1
