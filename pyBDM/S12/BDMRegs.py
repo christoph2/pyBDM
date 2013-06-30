@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2011 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -26,6 +26,8 @@ __copyright__="""
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+from pyBDM.Module import Module
+
 # BDM-Status-Register.
 REG_BDM_STATUS  = 0xFF01
 ENBDM       = 0x80
@@ -34,6 +36,7 @@ ENTAG       = 0x20
 SDV         = 0x10
 TRACE       = 0x08
 CLKSW       = 0x04
+UNSEC       = 0x02
 
 
 # BDM-Instruction-Register.
@@ -58,7 +61,7 @@ REG_BDM_SHIFTER = 0xFF02
 REG_BDM_ADDRESS = 0xFF04
 
 
-# CCR Holding Register
+# CCR Holding Register.
 REG_BDM_CCRSAV = 0xFF06
     # Condition Code Bits.
 CC_S        = 0x80
@@ -69,3 +72,22 @@ CC_N        = 0x08
 CC_Z        = 0x04
 CC_V        = 0x02
 CC_C        = 0x01
+
+# Internal Register Position Register.
+REG_BDM_INR = 0xFF07
+REG14   = 0x40
+REG13   = 0x20
+REG12   = 0x10
+REG11   = 0x08
+
+class Bdm(Module):
+    __REGISTERS8__ = (
+        ('status', REG_BDM_STATUS),
+        ('instruction', REG_BDM_INSTR),
+        ('ccrHolding', REG_BDM_CCRSAV),
+        ('internalRegisterPosition', REG_BDM_INR),
+    )
+    __REGISTERS16__ = (
+        ('shifter', REG_BDM_SHIFTER),
+        ('address', REG_BDM_ADDRESS)
+    )
