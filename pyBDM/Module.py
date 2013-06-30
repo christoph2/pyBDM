@@ -63,16 +63,16 @@ class Module(object):
                 setattr(self.__class__, name, registerProperty(name, reg, False))
 
     def read8(self, addr):
-        return self.port.readByte(addr)
+        return self.port.readBDByte(addr)
 
     def write8(self, addr, value):
-        self.port.writeByte(addr, value)
+        self.port.writeBDByte(addr, value)
 
     def read16(self, addr):
-        return self.port.readWord(addr)
+        return self.port.readBDWord(addr)
 
     def write16(self, addr, value):
-        self.port.writeWord(addr, value)
+        self.port.writeBDWord(addr, value)
 
     def setBits(self, value, mask):
         return value | mask
