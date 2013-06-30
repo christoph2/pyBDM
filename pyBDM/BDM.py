@@ -28,7 +28,7 @@ __copyright__="""
 
 import abc
 import logging
-from S12.BDMRegs import Bdm
+from S12.BdmModule import Bdm
 
 ##
 ##  BMD-Commands.
