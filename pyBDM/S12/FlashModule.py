@@ -86,9 +86,14 @@ class Flash(Module):
         ('fdata',   FDATA),
     )
 
+    def selectBank(self, bank):
+        tmp = self.fcnfg & (CBEIE | CCIE | KEYACC)
+        tmp |= bank
+        self.fcnfg = tmp
+
     def clearErrors(self, bank = None):
         if bank:
-            self.fcnfg = bank
+            self.selectBank(bank)
         self.fstat = (PVIOL | ACCERR)
 
     def secured(self):
