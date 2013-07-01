@@ -91,3 +91,6 @@ class Flash(Module):
             self.fcnfg = bank
         self.fstat = (PVIOL | ACCERR)
 
+    def secured(self):
+        return (self.fsec & 0x03) != 0x02
+
