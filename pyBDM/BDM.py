@@ -33,33 +33,11 @@ from S12.BdmModule import Bdm
 ##
 ##  BMD-Commands.
 ##
-"""
-BACKGROUND      90  None
-    Enter background mode if ?rmware is enabled. If enabled, an ACK will be issued when the part enters active background mode.
-ACK_ENABLE      D5  None
-    Enable Handshake. Issues an ACK pulse after the command is executed.
-ACK_DISABLE     D6  None
-    Disable Handshake. This command does not issue an ACK pulse.
-READ_BD_BYTE    E4  16-bit address  16-bit data out
-    Read from memory with standard BDM ?rmware lookup table in map. Odd address data on low byte; even address data on high byte.
-READ_BD_WORD    EC  16-bit address  16-bit data out
-    Read from memory with standard BDM ?rmware lookup table in map. Must be aligned access.
-READ_BYTE       E0  16-bit address  16-bit data out
-    Read from memory with standard BDM ?rmware lookup table out of map. Odd address data on low byte; even address data on high byte.
-READ_WORD       E8  16-bit address  16-bit data out
-    Read from memory with standard BDM ?rmware lookup table out of map. Must be aligned access.
-WRITE_BD_BYTE   C4  16-bit address  16-bit data in
-    Write to memory with standard BDM ?rmware lookup table in map. Odd address data on low byte; even address data on high byte.
-WRITE_BD_WORD   CC  16-bit address  16-bit data in
-    Write to memory with standard BDM ?rmware lookup table in map. Must be aligned access.
-WRITE_BYTE      C0  16-bit address  16-bit data in
-    Write to memory with standard BDM ?rmware lookup table out of map. Odd address data on low byte; even address data on high byte.
-WRITE_WORD      C8  16-bit address  16-bit data in
-    Write to memory with standard BDM ?rmware lookup table out of map. Must be aligned access.
-"""
 
 # BDM Hardware Commands.
 BACKGROUND      = 0x90 # Enter background mode if firmware enabled.
+ACK_ENABLE      = 0xD5 # Enable Handshake. Issues an ACK pulse after the command is executed.
+ACK_DISABLE     = 0xD6 # Disable Handshake. This command does not issue an ACK pulse.
 READ_BD_BYTE    = 0xE4 # Read from memory with BDM in map.
 READ_BD_WORD    = 0xEC # Read from memory with BDM in map.
 READ_BYTE       = 0xE0 # Read from memory with BDM out of map.
