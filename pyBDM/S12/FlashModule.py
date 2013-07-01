@@ -94,3 +94,7 @@ class Flash(Module):
     def secured(self):
         return (self.fsec & 0x03) != 0x02
 
+    def keyAccess(self):
+        return (self.fsec & 0xc0) == 0x80
+
+
