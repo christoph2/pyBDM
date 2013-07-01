@@ -86,6 +86,8 @@ class Flash(Module):
         ('fdata',   FDATA),
     )
 
-    def clearErrors(self):
+    def clearErrors(self, bank = None):
+        if bank:
+            self.fcnfg = bank
         self.fstat = (PVIOL | ACCERR)
 
