@@ -69,8 +69,9 @@ class Port(Port.Port):
         return bytearray(data)
 
     def close(self):
-        if not self.port.closed:
-            self.port.close()
+        if self.port is not None:
+            if not self.port.closed:
+                self.port.close()
 
 
 
