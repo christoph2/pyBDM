@@ -60,9 +60,11 @@ WRITE_D         = 0x44 # Write D accumulator.
 WRITE_X         = 0x45 # Write X index register.
 WRITE_Y         = 0x46 # Write Y index register.
 WRITE_SP        = 0x47 # Write stack pointer.
-GO              = 0x08 # Go to user program.
-TRACE1          = 0x10 # Execute one user instruction then return to BDM.
-TAGGO           = 0x18 # Enable tagging and go to user program.
+GO_UNTIL        = 0x0C # Go to user program. If enabled, ACK will occur upon returning to active background mode.
+GO              = 0x08 # Go to user program.  If enabled, ACK will occur when leaving active background mode.
+TRACE1          = 0x10 # Execute one user instruction then return to BDM.  If enabled, ACK will occur upon
+                       # returning to active background mode
+TAGGO           = 0x18 # Enable tagging and go to user program. There is no ACK pulse related to this command.
 
 abstractmethod = abc.abstractmethod
 
@@ -91,6 +93,16 @@ ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s[%(levelname)s]: %(message)s","%Y-%m-%d %H:%M:%S")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
+def slicer(iteratable, sliceLength, resultType = None):
+    if resultType is None:
+        resultType = type(iteratable)
+    length = len(iteratable)
+    return [resultType(iteratable[i : i + sliceLength]) for i in range(0, length, sliceLength)]
+
+
+def hexDump(arr):
+    return ' '.join([("0x%02x" % x) for x in arr])
 
 class CommunicationError(Exception): pass
 
@@ -258,11 +270,13 @@ class Device(object):
         for l in range(loops):
             self.logger.debug("Reading %u bytes starting @ 0x%04x." % (self.MAX_READ_PAYLOAD, offset))
             data = self.__readArea__(offset, self.MAX_READ_PAYLOAD)
+            self.logger.debug("[%s]" % hexDump(data))
             result.extend(data)
             offset += self.MAX_READ_PAYLOAD
         if bytesRemaining:
             self.logger.debug("Reading %u bytes starting @ 0x%04x." % (bytesRemaining, offset))
             data = self.__readArea__(offset,bytesRemaining)
+            self.logger.debug("[%s]" % hexDump(data))
             result.extend(data)
         return result
 
@@ -292,15 +306,17 @@ class Device(object):
         dataOffsetTo = self.MAX_WRITE_PAYLOAD
         for l in range(loops):
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (self.MAX_WRITE_PAYLOAD, addrOffset))
-            slice = data[dataOffsetFrom : dataOffsetTo]
-            self.__writeArea__(addrOffset, self.MAX_WRITE_PAYLOAD, slice)
+            dslice = data[dataOffsetFrom : dataOffsetTo]
+            self.logger.debug("[%s]" % hexDump(dslice))
+            self.__writeArea__(addrOffset, self.MAX_WRITE_PAYLOAD, dslice)
             addrOffset += self.MAX_WRITE_PAYLOAD
             dataOffsetFrom = dataOffsetTo
             dataOffsetTo = dataOffsetFrom + self.MAX_WRITE_PAYLOAD
         if bytesRemaining:
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
-            slice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
-            self.__writeArea__(addrOffset, bytesRemaining, slice)
+            dlice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
+            self.logger.debug("[%s]" % hexDump(dslice))
+            self.__writeArea__(addrOffset, bytesRemaining, dslice)
 
     def getPPage(self):
         return self.readBDByte(PPAGE)
