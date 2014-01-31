@@ -29,7 +29,7 @@ __copyright__="""
 from pyBDM.Module import Module
 
 # BDM-Status-Register.
-REG_BDM_STATUS  = 0xFF01
+BDMSTS          = 0xFF01
 ENBDM       = 0x80
 BDMACT      = 0x40
 ENTAG       = 0x20
@@ -40,7 +40,7 @@ UNSEC       = 0x02
 
 
 # BDM-Instruction-Register.
-REG_BDM_INSTR = 0xFF00
+BDMIST = 0xFF00
     # hardware command bits.
 HF          = 0x80
 DATA        = 0x40
@@ -54,15 +54,18 @@ REGN        = 0x07
 
 
 # BDM Shift Register.
-REG_BDM_SHIFTER = 0xFF02
+BDMSHTH         = 0xFF02
+BDMSHTL         = 0xFF03
 
 
 # BDM Address Register.
-REG_BDM_ADDRESS = 0xFF04
+BDMADDH         = 0xFF04
+BDMADDL         = 0xFF05
 
 
 # CCR Holding Register.
-REG_BDM_CCRSAV = 0xFF06
+BDMCCR          = 0xFF06
+#  Out of special single-chip reset, the BDMCCR is set to $D8 and not $D0 which is the reset value of the CCR register.
     # Condition Code Bits.
 CC_S        = 0x80
 CC_X        = 0x40
@@ -74,7 +77,7 @@ CC_V        = 0x02
 CC_C        = 0x01
 
 # Internal Register Position Register.
-REG_BDM_INR = 0xFF07
+BDMINR = 0xFF07
 REG14   = 0x40
 REG13   = 0x20
 REG12   = 0x10
@@ -82,12 +85,19 @@ REG11   = 0x08
 
 class Bdm(Module):
     __REGISTERS8__ = (
-        ('status', REG_BDM_STATUS),
-        ('instruction', REG_BDM_INSTR),
-        ('ccrHolding', REG_BDM_CCRSAV),
-        ('internalRegisterPosition', REG_BDM_INR),
+        ('bdmsts', BDMSTS),
+        ('bdmist', BDMIST),
+        ('bdmccr', BDMCCR),
+        ('bdminr', BDMINR),
     )
     __REGISTERS16__ = (
-        ('shifter', REG_BDM_SHIFTER),
-        ('address', REG_BDM_ADDRESS)
+        ('shifter', BDMSHTH),
+        ('address', BDMADDH)
     )
+
+    def enableFirmware(self):
+        self.setRegisterBits(self.bdmsts, ENBDM)
+
+    def disableFirmware(self):
+        self.clearRegisterBits(self.bdmsts, ENBDM)
+
