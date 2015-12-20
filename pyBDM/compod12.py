@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__="0.1.0"
+__version__ = "0.1.0"
 
-__copyright__="""
+__copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -26,11 +26,12 @@ __copyright__="""
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import BDM
-import Serial
+import bdm
+import serialport
 
-from BDM import Device
-from Port import Port
+from bdm import BDMBase
+from port import Port
+from pyBDM.bdm import hexDump
 
 # Elektonikladen Commands.
 RESET           = 0x80 # Reset
@@ -45,15 +46,17 @@ class InvalidResponseError(Exception): pass
 def com(v):
     return 0xff & ~v
 
-class ComPod12(Device,Serial.Port):
+class ComPod12(BDMBase, serialport.Port):
+
     MAX_WRITE_PAYLOAD = 0xff
-    MAX_READ_PAYLOAD = 0x58
+    MAX_READ_PAYLOAD = 16 # 0xff
     DEVICE_NAME = "Elektronik-Laden ComPOD12"
     VARIABLE_BUS_FREQUENCY = False
 
-    def __writeCommand__(self,cmd):
+    def __writeCommand__(self, cmd):
         self.write(cmd)
         data = self.read(1)
+        self.port.flush() # ?
         if data == bytearray():
             raise NoResponseError
         if data[0] != com(cmd):
@@ -63,27 +66,29 @@ class ComPod12(Device,Serial.Port):
         else:
             return None
 
-    def __readCommand__(self,cmd,responseLen,addr=None):
+    def __readCommand__(self, cmd, responseLen, addr = None):
         self.write(cmd)
         if not addr is None:
             self.write((addr >> 8) & 0xff)
             self.write(addr & 0xff)
         data = self.read(responseLen)
+        self.port.flush() # ?
         if data == bytearray():
             raise NoResponseError
         if len(data) != responseLen:
             raise InvalidResponseError
         return data
 
-    def __readWord__(self,cmd,addr=None):
+    def __readWord__(self, cmd, addr = None):
         data = self.__readCommand__(cmd, 2, addr)
+        self.port.flush() # ?
         if data == bytearray():
             raise NoResponseError
         if len(data) != 2:
             raise InvalidResponseError
         return data[0] << 8 | data[1]
 
-    def __writeWord__(self,cmd,data0,data1=None):
+    def __writeWord__(self, cmd, data0, data1 = None):
         self.write(cmd)
         self.write((data0 >> 8) & 0xff)
         self.write(data0 & 0xff)
@@ -91,17 +96,19 @@ class ComPod12(Device,Serial.Port):
             self.write((data1 >> 8) & 0xff)
             self.write(data1 & 0xff)
         d = self.read(1)
+        self.port.flush() # ?
         if d == bytearray():
             raise NoResponseError
         if (d[0] != com(cmd)):
             raise InvalidResponseError
 
-    def __writeByte__(self,cmd,addr,data):
+    def __writeByte__(self, cmd, addr, data):
         self.write(cmd)
         self.write((addr >> 8) & 0xff)
         self.write(addr & 0xff)
         self.write(data)
         d = self.read(1)
+        self.port.flush() # ?
         if d == bytearray():
             raise NoResponseError
         if (d[0] != com(cmd)):
@@ -112,8 +119,8 @@ class ComPod12(Device,Serial.Port):
         self.__writeCommand__(RESET)
 
     def getPODVersion(self):
-        data=self.__readCommand__(VERSION, 2)
-        return "%s v%02u.%02u" % (self.DEVICE_NAME,data[0], data[1])
+        data = self.__readCommand__(VERSION, 2)
+        return "%s v%02u.%02u" % (self.DEVICE_NAME, data[0], data[1])
 
     def __readArea__(self, addr, length):
         self.write(READ_AREA)
@@ -121,11 +128,12 @@ class ComPod12(Device,Serial.Port):
         self.write(addr & 0xff)
         self.write(length)
         data = self.read(length)
+        self.port.flush() # ?
         if len(data) == 0:
             raise NoResponseError
         if len(data) != length:
-            print "Expected: %u Actual %u" % (length, len(data))
-            raise InvalidResponseError
+            #print "Expected: %u Actual %u" % (length, len(data))
+            raise InvalidResponseError("Expected %u bytes got %u." % (length, len(data)))
         return data
 
     def __writeArea__(self, addr, length, data):
@@ -135,7 +143,9 @@ class ComPod12(Device,Serial.Port):
         self.write(length)
         self.write(tuple(data))
         d = self.read(1)
+        self.port.flush() # ?
         if d == bytearray():
             raise NoResponseError
         if (d[0] != com(WRITE_AREA)):
             raise InvalidResponseError
+

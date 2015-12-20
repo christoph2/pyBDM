@@ -7,7 +7,7 @@ __copyright__ = \
     """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved

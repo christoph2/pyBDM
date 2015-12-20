@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__="0.1.0"
+__version__ = "0.1.0"
 
-__copyright__="""
+__copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
    (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
@@ -26,7 +26,7 @@ __copyright__="""
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from pyBDM.Module import Module
+from pyBDM.module import Module
 
 # BDM-Status-Register.
 BDMSTS          = 0xFF01

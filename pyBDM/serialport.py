@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__="0.1.0"
+__version__ = "0.1.0"
 
-__copyright__="""
+__copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -26,14 +26,18 @@ __copyright__="""
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import Port
+import port
 import serial
 import sys
 import types
 
 class PortException(serial.SerialException): pass
+from pyBDM.bdm import hexDump, slicer
 
-class Port(Port.Port):
+def dumpa(arr):
+    return [s for s in slicer(arr, 2)]
+
+class Port(port.Port):
     def __init__(self, num, baudrate, bytesize = serial.EIGHTBITS, parity = serial.PARITY_NONE, stopbits = serial.STOPBITS_ONE,
             timeout = 0.1):
         self.port = None
@@ -63,17 +67,19 @@ class Port(Port.Port):
         if not isinstance(data, (types.ListType, types.TupleType)):
             data = [data]
         self.port.write(bytearray(data))
+        #self.port.flush()
 
-    def read(self, len):
-        data = self.port.read(len)
+    def read(self, length):
+        data = self.port.read(length)
+        #return bytearray(data)
+        #print "Serial::read: '%s' [%s]." % (dumpa(data), hexDump(bytearray(data)))
+        #self.port.flush()
         return bytearray(data)
 
     def close(self):
         if self.port is not None:
             if not self.port.closed:
                 self.port.close()
-
-
 
 def main():
     pass

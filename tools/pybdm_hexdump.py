@@ -36,7 +36,7 @@ import re
 import os
 import sys
 import time
-from pyBDM.ComPod12 import ComPod12
+from pyBDM.compod12 import ComPod12
 from pyBDM.KevinRo import KevinRoBDM12
 
 
@@ -112,6 +112,119 @@ class TwoByteHexDumper(Dumper): pass
 class FormattedDumper(Dumper): pass
 
 
+###
+###
+###
+
+BASE = r'C:\projekte\csProjects\pyBDM\pyBDM\S12\programmer'
+START_OF_RAM = 0x1000
+
+def formatBin(image):
+    return ' '.join(["0x%02x" % b for b in image])
+
+class Loader(object):
+
+    def __init__ (self, pod):
+        self.pod = pod
+        self.prolog()
+
+    def prolog(self):
+        self.pod.reset()
+        d = self.pod.getPODVersion()
+        d = self.pod.readBDByte(0xff01)
+        d = self.pod.readByte(0x000b)
+
+        d = self.pod.readBDByte(0xff01)
+        self.pod.writeBDByte(0xff01, 0xc4)
+        d = self.pod.readByte(0x0030)
+
+        d = self.pod.readBDByte(0xff01)
+
+
+
+        """
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: E8 FF FE      ; READ_WORD
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 4B D9
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 1: 63            ; READ_PC
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 4A 4D
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 1: 64            ; READ_D
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 00 00
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 1: 65            ; READ_X
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 00 00
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 1: 66            ; READ_Y
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 00 00
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 1: 67            ; READ_SP
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 00 00
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: E4 FF 06      ; READ_BD_BYTE
+        RP_MJ_READ      Serial0 SUCCESS Length 1: D8
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: 43 4B D9      ; WRITE_PC
+        RP_MJ_READ      Serial0 SUCCESS Length 1: BC
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: 44 00 00      ; WRITE_D
+        RP_MJ_READ      Serial0 SUCCESS Length 1: BB
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: 45 00 00      ; WRITE_X
+        RP_MJ_READ      Serial0 SUCCESS Length 1: BA
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: 46 00 00      ; WRITE_Y
+        RP_MJ_READ      Serial0 SUCCESS Length 1: B9
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: 47 00 00      ; WRITE_SP
+        RP_MJ_READ      Serial0 SUCCESS Length 1: B8
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 4: C4 FF 06 D8   ; WRITE_BD_BYTE
+        RP_MJ_READ      Serial0 SUCCESS Length 1: 3B
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 3: E0 00 0B      ; READ_BYTE
+        RP_MJ_READ      Serial0 SUCCESS Length 1: 00
+
+        RP_MJ_WRITE     Serial0 SUCCESS Length 4: 83 00 1A 02   ; READ_AREA
+        RP_MJ_READ      Serial0 SUCCESS Length 2: 00 12
+        """
+
+    def loadFlasherImage(self):
+        flashImage = bytearray(open(os.path.join(BASE, 'flash.bin'), 'rb').read())
+        print "Loading Flasher Image..."
+        #print formatBin(flashImage)
+        self.pod.writeArea(START_OF_RAM, flashImage)
+        print "Done."
+        readBack = self.pod.readArea(START_OF_RAM, len(flashImage))
+        dumpData(CanonicalDumper(), readBack)
+
+        #print "PC: %#x" % (self.pod.bdmModule)
+
+        #readBack = self.pod.readArea(START_OF_RAM, len(flashImage))
+        #dumpData(CanonicalDumper(), readBack)
+        #assert(flashImage == readBack)
+###
+###
+###
+
+import types
+from pyBDM.BDM import hexDump
+
+def dumpa(arr):
+    return ' '.join([("0x%02x" % ord(x)) for x in arr])
+
+def injectReader(pod):  # Example for DI!!!
+    reader = pod.port.read
+    #print reader
+    def read(self, length):
+        data = reader(length)
+        print "*** READ[%u]: '%s'." % (length, dumpa(data))
+        return data
+    #print help(types.MethodType)
+    print
+    pod.port.read = types.MethodType(read, pod)
+
+
 
 def main():
     options = []
@@ -170,10 +283,22 @@ def main():
     logger.debug('=' * 43)
     pod = podDevice(port, 38400)
     pod.connect()
+
+    #injectReader(pod)
+
     pod.reset()
+    pod.targetHalt()
+
+    pod.bdmModule.enableFirmware()
     logger.info("BDM-POD: '%s'." % pod.getPODVersion())
     logger.info('Reading %u bytes starting @ 0x%04x.' % (length, startAddr))
     startTime = time.clock()
+
+
+    loader = Loader(pod)
+    loader.loadFlasherImage()
+    #print hex(pod.readWord(0x1000)), hex(pod.readWord(0x1002)), hex(pod.readWord(0x1004)), hex(pod.readWord(0x1006)), hex(pod.readWord(0x1008))
+
     data = pod.readArea(startAddr, length)
     elapsedTime = time.clock() - startTime
     logger.info("%2.2f seconds ==> %2.2f bytes/sec.", elapsedTime, length / elapsedTime)

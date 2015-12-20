@@ -18,7 +18,7 @@ setup(
         ],
     },
     install_requires=[
-	'pyserial', 'pyusb', #'wxpython'
+	'pyserial', 'mock', #'wxpython'
     ],
 )
 

@@ -26,16 +26,3 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from pyBDM.compod12 import ComPod12
-from pyBDM.s12.autoprobe import autoprobe
-
-def main():
-    pod = ComPod12("COM24", 38400)
-    pod.connect()
-    pod.reset()
-    pod.targetHalt()
-    print(autoprobe(pod))
-
-
-if __name__=='__main__':
-    main()

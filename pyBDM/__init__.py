@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import S12
+import s12
 
 class PodBuilder(object):   pass

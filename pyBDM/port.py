@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = "0.1.0"
+__version__="0.1.0"
 
-__copyright__ = """
+__copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2014 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -26,16 +26,17 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from pyBDM.compod12 import ComPod12
-from pyBDM.s12.autoprobe import autoprobe
+import abc
 
-def main():
-    pod = ComPod12("COM24", 38400)
-    pod.connect()
-    pod.reset()
-    pod.targetHalt()
-    print(autoprobe(pod))
+abstractmethod = abc.abstractmethod
+
+class Port(object):
+    MAX_PAYLOAD = None
+
+    @abstractmethod
+    def write(self, data):   pass
+
+    @abstractmethod
+    def read(self, len):     pass
 
 
-if __name__=='__main__':
-    main()
