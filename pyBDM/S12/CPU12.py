@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -27,7 +27,6 @@ __copyright__="""
 """
 
 from collections import namedtuple
-import logging
 import os
 import re
 import sys
@@ -1521,8 +1520,6 @@ def disasm(addr, memory):
 
 
 def main():
-    logger = logging.getLogger('pyBDM')
-    logger.setLevel(logging.INFO)
     pod = ComPod12(0x0, 38400)
     pod.connect()
     pod.logger.debug('=' * 50)
@@ -1669,7 +1666,7 @@ def test():
 
     r = Reader0(data)
     memory = CachedMemory(r)
-    
+
     ## disasm(0xf8000, memory)
 
     p = PostbyteDecoder()

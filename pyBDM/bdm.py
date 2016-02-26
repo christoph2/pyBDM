@@ -27,8 +27,8 @@ __copyright__ = """
 """
 
 import abc
-import logging
 from pyBDM.s12.BdmModule import Bdm
+from pyBDM.logger import Logger
 
 ##
 ##  BMD-Commands.
@@ -87,13 +87,6 @@ PPAGE           = 0x30
 from collections import namedtuple
 MemorySizes = namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
 
-logger = logging.getLogger("pyBDM")
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s[%(levelname)s]: %(message)s","%Y-%m-%d %H:%M:%S")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
 def slicer(iteratable, sliceLength, resultType = None):
     if resultType is None:
         resultType = type(iteratable)
@@ -118,7 +111,7 @@ class BDMBase(object):
     VARIABLE_BUS_FREQUENCY = False
 
     def __init__(self, *args, **kwargs):
-        self.logger = logging.getLogger("pyBDM")
+        self.logger = Logger()
         super(BDMBase,self).__init__(*args, **kwargs)
         self.bdmModule = Bdm(self)
 

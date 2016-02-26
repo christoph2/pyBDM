@@ -3,11 +3,10 @@
 
 __version__ = '0.1.0'
 
-__copyright__ = \
-    """
+__copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -27,7 +26,7 @@ __copyright__ = \
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from pyBDM.Module import Module
+from pyBDM.module import Module
 
 INITRM      = 0x0010
 RAM15   = 0x80

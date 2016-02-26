@@ -26,7 +26,6 @@ __copyright__ =  """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import logging
 from pyBDM.module import Module
 
 logger = logging.getLogger('pyBDM')

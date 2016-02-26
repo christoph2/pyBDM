@@ -7,7 +7,7 @@ __copyright__ = \
     """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -27,11 +27,10 @@ __copyright__ = \
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+from pyBDM.logger import Logger
+
 __all__ = ['Module']
 
-import logging
-
-logger = logging.getLogger('pyBDM')
 
 def registerProperty(name, registerAddress, eightBit = True, doc = None):
     def fget8( self):
@@ -53,8 +52,10 @@ def registerProperty(name, registerAddress, eightBit = True, doc = None):
 
 
 class Module(object):
+
     def __init__(self, port):
         self._port = port
+        self.logger = Logger()
         if hasattr(self, '__REGISTERS8__'):
             for name, reg in self.__REGISTERS8__:
                 setattr(self.__class__, name, registerProperty(name, reg, True))
