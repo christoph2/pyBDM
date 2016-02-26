@@ -6,7 +6,7 @@ __version__ = "0.1.0"
 __copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -26,3 +26,16 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+if sys.version_info.major == 3:
+    from io import BytesIO as StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
+
+
+def createStringBuffer(*args):
+    """Create a string with file-like behaviour (StringIO on Python 2.x).
+    """
+    return StringIO(*args)
