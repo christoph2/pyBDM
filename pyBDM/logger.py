@@ -41,6 +41,13 @@ class Logger(object):
         formatter = logging.Formatter(self.FORMAT)
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
+        self.lastSeverity = None
+        self.lastMessage = None
+
+    def getLastError(self):
+        result = (self.lastSeverity, self.lastMessage)
+        self.lastMessage = self.lastSeverity = None
+        return result
 
     def log(self, message, level):
         self.logger.log(level, "{0}".format(message))
