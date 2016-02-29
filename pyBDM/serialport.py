@@ -6,7 +6,7 @@ __version__ = "0.1.0"
 __copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -32,7 +32,7 @@ import sys
 import types
 
 class PortException(serial.SerialException): pass
-from pyBDM.bdm import hexDump, slicer
+from pyBDM.bdm import slicer
 
 def dumpa(arr):
     return [s for s in slicer(arr, 2)]

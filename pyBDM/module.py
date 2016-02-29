@@ -75,10 +75,10 @@ class Module(object):
     def write16(self, addr, value):
         self.port.writeBDWord(addr, value)
 
-    def setBits(self, value, mask):
+    def setBits(self, value, mask):     # TODO: Method could be a function (utils).
         return value | mask
 
-    def clearBits(self, value, mask):
+    def clearBits(self, value, mask):   # TODO: Method could be a function (utils).
         return value & (~mask)
 
     def bitsSet(self, value, mask):

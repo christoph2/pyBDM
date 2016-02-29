@@ -6,7 +6,7 @@ __version__ = "0.1.0"
 __copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -274,13 +274,13 @@ class BDMBase(object):
     def writePC(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_PC[0x%04x]", data)
+        self.logger.debug("WRITE_PC[0x{0:04x]".format(data))
         self.__writeWord__(WRITE_PC, data)
 
     def writeD(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_D[0x%04x]", data)
+        self.logger.debug("WRITE_D[0x{0:04x]".format(data))
         self.__writeWord__(WRITE_D, data)
 
     def writeX(self, data):

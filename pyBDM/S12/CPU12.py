@@ -28,7 +28,7 @@ __copyright__="""
 
 from collections import namedtuple
 import os
-import re
+
 import sys
 
 from pyBDM.compod12 import ComPod12
@@ -1215,13 +1215,13 @@ def signedByte(value):
 # 0x570D 63 -- DEC  7,PC    must be: 0x570D 63C7 DEC     5716,PCR
 
 class Decoding(object):
-    def __init__(self, opcode, mnemonic, mode, totalSize, page2, bytes, rawBytes):
+    def __init__(self, opcode, mnemonic, mode, totalSize, page2, bytes_, rawBytes):
         self.opcode = opcode
         self.mnemonic = mnemonic
         self.totalSize = totalSize
         self.page2 = page2
         self.mode = mode
-        self.bytes = bytes
+        self.bytes_ = bytes_
         self.rawBytes = rawBytes
 
 
@@ -1257,49 +1257,49 @@ def preDecode(addr, mem):
 def decodeMove(deco):
     operand = ""
     mode = deco.mode
-    bytes = deco.bytes
+    bytes_ = deco.byte_
     if 0x08 <= deco.opcode <= 0x0d:     # MOVB
         if mode == 'im-id':
-            idDest = bytes[0]
-            imm = bytes[1]
+            idDest = bytes_[0]
+            imm = bytes_[1]
         elif mode == 'ex-id':
-            idDest = bytes[0]
-            ext = makeword(bytes[1], bytes[2])
+            idDest = bytes_[0]
+            ext = makeword(bytes_[1], bytes_[2])
         elif mode == 'id-id':
-            idDest = bytes[0]
-            idSrc = bytes[1]
+            idDest = bytes_[0]
+            idSrc = bytes_[1]
         elif mode == 'im-ex':
-            imm = bytes[0]
-            ext = makeword(bytes[1], bytes[2])
+            imm = bytes_[0]
+            ext = makeword(bytes_[1], bytes_[2])
             operand = "#$%02X, $%04X" % (imm, ext)
         elif mode == 'ex-ex':
-            extDest = makeword(bytes[0], bytes[1])
-            extSrc = makeword(bytes[2], bytes[3])
+            extDest = makeword(bytes_[0], bytes_[1])
+            extSrc = makeword(bytes_[2], bytes_[3])
             operand = "$%04X, $%04X" % (extSrc, extDest)
         elif mode == 'id-ex':
-            idSrc = bytes[0]
-            ext = makeword(bytes[1], bytes[2])
+            idSrc = bytes_[0]
+            ext = makeword(bytes_[1], bytes_[2])
     elif 0x00 <= deco.opcode <= 0x05:   # MOVW
         if mode == 'im-id':
-            idDest = bytes[0]
-            imm = makeword(bytes[1], bytes[2])
+            idDest = bytes_[0]
+            imm = makeword(bytes_[1], bytes_[2])
         elif mode == 'ex-id':
-            idDest = bytes[0]
-            ext = makeword(bytes[1], bytes[2])
+            idDest = bytes_[0]
+            ext = makeword(bytes_[1], bytes_[2])
         elif mode == 'id-id':
-            idDest = bytes[0]
-            idSrc = bytes[1]
+            idDest = bytes_[0]
+            idSrc = bytes_[1]
         elif mode == 'im-ex':
-            imm = makeword(bytes[0], bytes[1])
-            ext = makeword(bytes[2], bytes[3])
+            imm = makeword(bytes_[0], bytes_[1])
+            ext = makeword(bytes_[2], bytes_[3])
             operand = "#$%04X, $%04X" % (imm, ext)
         elif mode == 'ex-ex':
-            extDest = makeword(bytes[0], bytes[1])
-            extSrc = makeword(bytes[2], bytes[3])
+            extDest = makeword(bytes_[0], bytes_[1])
+            extSrc = makeword(bytes_[2], bytes_[3])
             operand = "$%04X, $%04X" % (extSrc, extDest)
         elif mode == 'id-ex':
-            idSrc = bytes[0]
-            ext = makeword(bytes[1], bytes[2])
+            idSrc = bytes_[0]
+            ext = makeword(bytes_[1], bytes_[2])
     return operand
 
 
@@ -1309,43 +1309,43 @@ def dis2(addressFrom, addressTo, memory):
         operand = ''
         deco = preDecode(pc, memory)
         if deco.mnemonic == '*tfr/exg*':
-            deco.mnemonic = "%s" % ("TFR" if deco.bytes[0] <= 0x80 else "EXG")
-            operand = "%s" % (EB[deco.bytes[0]])
+            deco.mnemonic = "%s" % ("TFR" if deco.bytes_[0] <= 0x80 else "EXG")
+            operand = "%s" % (EB[deco.bytes_[0]])
         if deco.mode == IH:
             pass
         elif deco.mode == SPECIAL:
             pass
         elif  deco.mode == IM:
             if deco.totalSize == 2:
-                operand = '#$%02X' % deco.bytes[0]
+                operand = '#$%02X' % deco.bytes_[0]
             elif deco.totalSize == 3:
-                operand = '#$%04X' % ((deco.bytes[0] << 8) | deco.bytes[1],)
+                operand = '#$%04X' % ((deco.bytes_[0] << 8) | deco.bytes_[1],)
         elif deco.mode == DI:
-            operand = '$%02X' % (deco.bytes[0])
+            operand = '$%02X' % (deco.bytes_[0])
         elif deco.mode == EX:
             if isBitFunction(deco.mnemonic):
-                operand = '$%04X #$%02X' % ((deco.bytes[0] << 8) | deco.bytes[1], deco.bytes[2])
+                operand = '$%04X #$%02X' % ((deco.bytes_[0] << 8) | deco.bytes_[1], deco.bytes_[2])
             elif isBitBranchFunction(deco.mnemonic):
-                rel = signedByte(deco.bytes[3])
-                operand = "$%04X, #$%02X, $%04X" % ((deco.bytes[0] << 8) | deco.bytes[1], deco.bytes[2],  (pc + 5 + rel))
+                rel = signedByte(deco.bytes_[3])
+                operand = "$%04X, #$%02X, $%04X" % ((deco.bytes_[0] << 8) | deco.bytes_[1], deco.bytes_[2],  (pc + 5 + rel))
             else:
-                operand = '$%04X' % ((deco.bytes[0] << 8) | deco.bytes[1],)
+                operand = '$%04X' % ((deco.bytes_[0] << 8) | deco.bytes_[1],)
         elif deco.mode == ID:
             pass
         elif deco.mode == RL:
             if deco.opcode == LOOP:
                 try:
-                    lb = LB[deco.bytes[0]] # DBNE    Y,467B     0436FC
-                    rel = signedByte(deco.bytes[1])
+                    lb = LB[deco.bytes_[0]] # DBNE    Y,467B     0436FC
+                    rel = signedByte(deco.bytes_[1])
 
                     operand = "%s,$%04X" % (lb[1], (pc + 2 + rel))
                     mnemonic = lb[0]
                 except:
                     mnemonic = "TRAP"
-                    operand = "($%02x $%02x)" % (deco.opcode, deco.bytes[0])
+                    operand = "($%02x $%02x)" % (deco.opcode, deco.bytes_[0])
                 deco.mnemonic = mnemonic
             else:
-                rel = signedByte(deco.bytes[0])
+                rel = signedByte(deco.bytes_[0])
                 operand = "0x%04X" % (pc + 2 + rel)
         elif isMoveFunction(deco.mnemonic):
             operand = decodeMove(deco)
@@ -1365,7 +1365,7 @@ def disasm(addr, memory):
     decoder = PostbyteDecoder()
     pc = addr
     op = memory.getByte(pc)
-    mnemonic, cycles, mode, size = opcodeMapPage1.get(op, None)
+    mnemonic, _, mode, size = opcodeMapPage1.get(op, None)
     print "0x%04X %02x -- '%s'" % (pc, memory.getByte(pc), mnemonic)
     operand = ''
     xb = None
@@ -1612,7 +1612,7 @@ class PostbyteDecoder(object):
     def constantOffset(cls, postbyte):
         rr = cls.RR[(postbyte & 0x18) >> 3]
         z = (postbyte & 0x02) >> 1
-        s= postbyte & 0x01
+        #s = postbyte & 0x01
         sign = "-" if postbyte & 0x01 else ""
         return "%s%%s,%s" % (sign, rr, )
 
@@ -1651,12 +1651,12 @@ class Reader0(object):
     def __init__(self, data):
         self._data = data
 
-    def __call__(self, addr, len):
+    def __call__(self, addr, length):
         for data in self._data:
             if addr >= data.address and addr <= data.address + data.length:
                 a0 = addr - data.address
-                #print data.data[a0 : a0 + len]
-                return data.data[a0 : a0 + len]
+                #print data.data[a0 : a0 + length]
+                return data.data[a0 : a0 + length]
 
 def test():
     pd = preDecode(0x0000, [0x1a, 0xe5, 0x19, 0xed, 0x18, 0x06])
