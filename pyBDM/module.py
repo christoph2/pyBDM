@@ -28,6 +28,7 @@ __copyright__ = \
 """
 
 from pyBDM.logger import Logger
+from pyBDM.utils import setBits, clearBits, bitsSet
 
 __all__ = ['Module']
 
@@ -75,25 +76,16 @@ class Module(object):
     def write16(self, addr, value):
         self.port.writeBDWord(addr, value)
 
-    def setBits(self, value, mask):     # TODO: Method could be a function (utils).
-        return value | mask
-
-    def clearBits(self, value, mask):   # TODO: Method could be a function (utils).
-        return value & (~mask)
-
-    def bitsSet(self, value, mask):
-        return (value & mask) == mask
-
     def setRegisterBits(self, register, mask):
-        value = self.setBits(register, mask)
+        value = setBits(register, mask)
         register = value
 
     def clearRegisterBits(self, register, mask):
-        value = self.clearBits(register, mask)
+        value = clearBits(register, mask)
         register = value
 
     def registerBitsSet(self, register, mask):
-        return self.bitsSet(register, mask)
+        return bitsSet(register, mask)
 
     def _getPort(self):
         return self._port

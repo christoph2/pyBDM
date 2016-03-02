@@ -39,3 +39,13 @@ def createStringBuffer(*args):
     """Create a string with file-like behaviour (StringIO on Python 2.x).
     """
     return StringIO(*args)
+
+def setBits(value, mask):
+    return value | mask
+
+def clearBits(value, mask):
+    return value & (~mask)
+
+def bitsSet(value, mask):
+    return (value & mask) == mask
+
