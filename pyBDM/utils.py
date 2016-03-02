@@ -26,6 +26,9 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+import os
+import sys
+
 if sys.version_info.major == 3:
     from io import BytesIO as StringIO
 else:
@@ -48,4 +51,14 @@ def clearBits(value, mask):
 
 def bitsSet(value, mask):
     return (value & mask) == mask
+
+CYG_PREFIX = "/cygdrive/"
+
+def cygpathToWin(path):
+    if path.startswith(CYG_PREFIX):
+        path = path[len(CYG_PREFIX) : ]
+        driveLetter = "{0}:\\".format(path[0])
+        path = path[2 : ].replace("/", "\\")
+        path = "{0}{1}".format(driveLetter, path)
+    return path
 
