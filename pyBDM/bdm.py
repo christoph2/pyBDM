@@ -274,31 +274,31 @@ class BDMBase(object):
     def writePC(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_PC[0x{0:04x]".format(data))
+        self.logger.debug("WRITE_PC[0x{0:04x}]".format(data))
         self.__writeWord__(WRITE_PC, data)
 
     def writeD(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_D[0x{0:04x]".format(data))
+        self.logger.debug("WRITE_D[0x{0:04x}]".format(data))
         self.__writeWord__(WRITE_D, data)
 
     def writeX(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_X[0x%04x]", data)
+        self.logger.debug("WRITE_X[0x{0:04x}]".format(data))
         self.__writeWord__(WRITE_X, data)
 
     def writeY(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_Y[0x%04x]", data)
+        self.logger.debug("WRITE_Y[0x{0:04x}]".format(data))
         self.__writeWord__(WRITE_Y, data)
 
     def writeSP(self, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_SP[0x%04x]", data)
+        self.logger.debug("WRITE_SP[0x{0:04x}]".format(data))
         self.__writeWord__(WRITE_SP, data)
 
 ##

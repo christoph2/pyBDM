@@ -26,11 +26,8 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import bdm
 import serialport
-
 from bdm import BDMBase
-from pyBDM.bdm import hexDump
 
 # Elektonikladen Commands.
 RESET           = 0x80 # Reset

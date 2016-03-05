@@ -6,7 +6,7 @@ __version__ = '0.1.0'
 __copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -50,16 +50,16 @@ EXT_MEMPUT          = 0x06
 EXT_EXTENDEDSPEED   = 0x07
 
 class KevinRoBDM12(BDMBase, serialport.Port):
-    MAX_PAYLOAD=0xffff
-    DEVICE_NAME="Kevin Ross BDM12"
+    MAX_PAYLOAD = 0xffff
+    DEVICE_NAME = "Kevin Ross BDM12"
 
     def reset(self):
         self.logger.debug("RESET")
 
     def connect(self):
-        super(KevinRoBDM12,self).connect()
-        self.port.dtrdsr=0
-        self.port.rtscts=0
+        super(KevinRoBDM12, self).connect()
+        self.port.dtrdsr = 0
+        self.port.rtscts = 0
 
         self.port.setRTS(0)  # raising RTS edge needed.
         self.port.setRTS(1)
@@ -70,47 +70,46 @@ class KevinRoBDM12(BDMBase, serialport.Port):
         self.port.setRTS(0)
         time.sleep(0.01)
         if self.port.getCTS():
-            self.extendedCommandsSupported=self.ctsRtsControl=True     # >= v4.5
+            self.extendedCommandsSupported = self.ctsRtsControl = True     # >= v4.5
         else:
-            self.extendedCommandsSupported=self.ctsRtsControl=False    # <= v4.4
-        pass
+            self.extendedCommandsSupported = self.ctsRtsControl = False    # <= v4.4
 
-    def write(self,data):
-        startTime=0
-        timeSpan=0
-        waitCTSToClearTimeout=self.ctsRtsControl and 0.100 or 0.02
+    def write(self, data):
+        startTime = 0
+        timeSpan = 0
+        waitCTSToClearTimeout = self.ctsRtsControl and 0.100 or 0.02
 
         for ch in data:
             if self.ctsRtsControl:
                 self.port.setRTS(1)
-            startTime=time.time()
-            startTime=time.time()
-            timeSpan=-1.0
-            while timeSpan<0.1:
+            startTime = time.time()
+            timeSpan = -1.0
+            while timeSpan < 0.1:
                 if self.port.getCTS():
                     break
-                timeSpan=time.time()-startTime
+                timeSpan = time.time() - startTime
             if not self.port.getCTS():
                 self.logger.error("CTS not asserted by BDM interface. Check cable and BDM12 power.")
                 raise BDM.CommunicationError()
             self.port.write(ch)
-            startTime=time.time()
-            timeSpan=-1.0
+            startTime = time.time()
+            timeSpan = -1.0
             while timeSpan<waitCTSToClearTimeout:
                 if not self.port.getCTS():
                     break
-                timeSpan=time.time()-startTime
+                timeSpan = time.time() - startTime
             if self.ctsRtsControl:
                 self.port.setRTS(0)
                 if self.port.getCTS():
                     self.logger.debug("CTS not cleared.")
 
-    def extendedCommand(self,code,*operands):
+    def extendedCommand(self, code, *operands):
         pass
 
     def getPODVersion(self):
         if self.extendedCommandsSupported:
             data=self.extendedCommand(EXT_VERSION)
-            return "%s v%02u.%02u" % (self.DEVICE_NAME,((data[0]>>4) & 0x07),(data[0] & 0x0f))
+            return "{0} v{1:02d}.{2:02d}".format(self.DEVICE_NAME, ((data[0] >> 4) & 0x07), (data[0] & 0x0f))
         else:
-            return "%s <v4.5" % (self.DEVICE_NAME)
+            return "{0} < v4.5".format(self.DEVICE_NAME)
+

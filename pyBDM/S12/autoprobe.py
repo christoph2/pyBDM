@@ -6,7 +6,7 @@ __version__ = "0.1.0"
 __copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2012 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -151,19 +151,17 @@ def probeHC12(port):
 def autoprobe(port):
     partID = port.getPartID()
     if partID != 0:
-        '''
-        familyID = (partID & 0xf000) >> 12
-        memoryID = (partID & 0x0f00) >> 0x8
-        maskMajor = (partID & 0x00f0) >> 0x4
-        maskMinor = partID & 0x000f
-        print 'PartID:  ', hex(partID)
-        print 'Family:  ', FAMILIES[familyID]
-        print 'Flash:    %sKB' % (MEMORY_IDs[memoryID], )
-        print port.getMemorySizes()
-        print 'BDM-Status: 0x%02X' % port.readBDByte(0xff01)
-        '''
-        id = PartIDs.IDs.get(partID, ('not supported yet', 'n/a') )  # todo: Logging!!!
-        return id
+        #familyID = (partID & 0xf000) >> 12
+        #memoryID = (partID & 0x0f00) >> 0x8
+        #maskMajor = (partID & 0x00f0) >> 0x4
+        #maskMinor = partID & 0x000f
+        #print 'PartID:  ', hex(partID)
+        #print 'Family:  ', FAMILIES[familyID]
+        #print 'Flash:    %sKB' % (MEMORY_IDs[memoryID], )
+        #print port.getMemorySizes()
+        #print 'BDM-Status: 0x%02X' % port.readBDByte(0xff01)
+        partId = PartIDs.IDs.get(partID, ('not supported yet', 'n/a') )  # todo: Logging!!!
+        return partId
     else:
         pod.logger.info(PartIDs.IDs.get(partID, 'Unknown S12-Derivate, maybe a HC12?'))
         return probeHC12(port)

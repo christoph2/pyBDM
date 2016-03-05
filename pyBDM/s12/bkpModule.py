@@ -6,7 +6,7 @@ __version__ = '0.1.0'
 __copyright__ =  """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -95,12 +95,12 @@ HIGH_BYTE   = 0b01
 LOW_BYTE    = 0b10
 NO_COMPARE  = 0b11
 
-DATA_COMPARE_MODES = {
-    "full":
-    "high":
-    "low":
-    "non":
-}
+#DATA_COMPARE_MODES = {
+#    "full":
+#    "high":
+#    "low":
+#    "non":
+#}
 
 READ_WRITE_MODE = {
     "rw": 0xb00,

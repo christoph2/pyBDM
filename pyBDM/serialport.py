@@ -28,7 +28,6 @@ __copyright__ = """
 
 import port
 import serial
-import sys
 import types
 
 class PortException(serial.SerialException): pass

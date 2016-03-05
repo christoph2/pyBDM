@@ -26,7 +26,6 @@ __copyright__="""
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from collections import namedtuple
 import os
 
 import sys
@@ -1231,14 +1230,14 @@ def preDecode(addr, mem):
     decoder = PostbyteDecoder()
     if mem.getByte(addr + 0) == PAGE2:
         idx = 1
-        map = opcodeMapPage2
+        opcodeMap = opcodeMapPage2
         page2 = True
     else:
         idx = 0
-        map = opcodeMapPage1
+        opcodeMap = opcodeMapPage1
         page2 = False
     opcode = mem.getByte(addr + idx)
-    mnemonic, cycles, mode, size = map.get(opcode, None)
+    mnemonic, _, mode, size = opcodeMap.get(opcode, None)
     if mode == ID:
         # Size depends on indexing mode.
         _, _, byteCount = XB.get(mem.getByte(addr + 1 + idx))
@@ -1375,7 +1374,7 @@ def disasm(addr, memory):
         pc &= 0xfffff
         op = memory.getByte(pc)
         operand = ''
-        mnemonic, cycles, mode, size = opcodeMapPage1.get(op, None)
+        mnemonic, _, mode, size = opcodeMapPage1.get(op, None)
 
         if op == PAGE_TWO:
             op = memory.getByte(pc + 1)
@@ -1642,7 +1641,6 @@ class PostbyteDecoder(object):
         return "%s,%s" % (n, rr)
 
 
-"Optimized postbyte decoding."
 
 from objutils.SRecords import Reader
 
