@@ -18,7 +18,8 @@ setup(
         ],
     },
     install_requires=[
-	'pyserial', 'mock', #'wxpython'
+	'pyserial', 'mock', 'enum34'
     ],
+    test_suite = "tests"
 )
 
