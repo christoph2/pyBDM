@@ -7,7 +7,7 @@ __copyright__ = \
     """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -211,14 +211,4 @@ class Dbg(Module):
 
     def setCaptureMode(captureMode):
         self.setRegisterBits(self.dbgc1, captureMode)
-
-def main():
-    dbg = Dbg(Port())
-    dbg.enableDbgMode()
-    dbg.dbgsc = 0x25
-    print dbg.dbgsc
-
-
-if __name__ == '__main__':
-    main()
 
