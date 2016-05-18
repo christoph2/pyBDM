@@ -9,7 +9,7 @@ setup(
     author='Christoph Schueler',
     author_email='cpu12.gems@googlemail.com',
     url='http://www.github.com/Christoph2/pyBDM',
-    packages=['pyBDM', 'PyBDM/S12'],
+    packages=['pyBDM', 'PyBDM/s12'],
     entry_points = {
 	'console_scripts': [
 		'bdm_partinfo = pyBDM.scripts.bdm_partinfo:main'
