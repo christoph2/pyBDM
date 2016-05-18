@@ -1168,7 +1168,7 @@ class CachedMemory(object):
 
     def getWord(self, address):
         if (address & 0x0001) == 0x0001:
-            raise AlignmentError, "Address must be word aligned."
+            raise AlignmentError("Address must be word aligned.")
         page, offset = self.getPageAddress(address)
         if page not in self.cache:
             # todo: Log (DEBUG)!!!
@@ -1392,7 +1392,7 @@ def disasm(addr, memory):
             elif size == 3:
                 operand = '#$%04X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2),)
             else:
-                raise NotImplementedError
+                raise NotImplementedError()
         elif mode == ID:
             op2 = memory.getByte(pc + 1)
             operand = decoder.decode(op2)
@@ -1487,7 +1487,7 @@ def disasm(addr, memory):
                 elif size == 5:
                     operand = "#$%04X %s" % (((memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4))), xb[0])
                 else:
-                    raise NotImplementedError
+                    raise NotImplementedError()
             elif mode == 'ex-id':
                 xb = XB[memory.getByte(pc + 2)]
                 operand = "$%04X %s" % (((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)), xb[0])
@@ -1501,18 +1501,18 @@ def disasm(addr, memory):
                 elif size == 6:
                     operand = "#$%04X,$%04X" % (((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | memory.getByte(pc + 5))
                 else:
-                    raise NotImplementedError,"???"
+                    raise NotImplementedError("???")
             elif mode == 'ex-ex':
                 operand = "$%04X,$%04X" % (((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | (memory.getByte(pc + 5)))
             elif mode == 'id-ex':
                 xb = XB[memory.getByte(pc + 2)]
                 operand = "%s $%04X" % (xb[0], ((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)))
             else:
-                raise NotImplementedError, "Invalid Addressing Mode."
+                raise NotImplementedError("Invalid Addressing Mode.")
             lhs, rhs = mode.split('-')
             # print "\t\t%s | %s" % (lhs, rhs)
         else:
-            raise NotImplementedError, "Fix me!!!"
+            raise NotImplementedError("Fix me!!!")
 
         print "0x%04X %02X -- %s\t%s" % (pc, op, mnemonic, operand)
         operand = ''
