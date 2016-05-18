@@ -52,15 +52,15 @@ class Port(port.Port):
             self.port = serial.Serial(port = self.num, baudrate = self.baudrate, bytesize = self.bytesize, parity = self.parity,
                 stopbits = self.stopbits, timeout = self.timeout
             )
-        except serial.SerialException, e:
+        except serial.SerialException as e:
             raise PortException(e)
 
-#        print "OK, openend as '%s' @ %d Bits/Sec." % (self.port.portstr,self.port.baudrate)
+#        print("OK, openend as '%s' @ %d Bits/Sec." % (self.port.portstr,self.port.baudrate))
 
     def __del__(self):
         if self.port and self.port.isOpen() == True:
             self.port.close()
-#            print "Closed COM-Port."
+#            print("Closed COM-Port.")
 
     def write(self, data):
         if not isinstance(data, (types.ListType, types.TupleType)):
@@ -71,7 +71,7 @@ class Port(port.Port):
     def read(self, length):
         data = self.port.read(length)
         #return bytearray(data)
-        #print "Serial::read: '%s' [%s]." % (dumpa(data), hexDump(bytearray(data)))
+        #print("Serial::read: '%s' [%s]." % (dumpa(data), hexDump(bytearray(data))))
         #self.port.flush()
         return bytearray(data)
 
