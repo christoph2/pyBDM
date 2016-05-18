@@ -1182,7 +1182,7 @@ class CachedMemory(object):
 
     def readPage(self, address):
         page = self.getPageAddress(address)
-        print hex(address),hex(page)
+        print("{0:02X} {1:02X}".format(address, page))
 
     def flushCache(self):
         '''
@@ -1353,10 +1353,10 @@ def dis2(addressFrom, addressTo, memory):
         else:
             pass
 
-        print "0x%04X " % (pc, ),
+        print("0x%04X " % (pc, )),
         for b in deco.rawBytes:
             print "%02X" % (b, ),
-        print "-- %s\t%s" % (deco.mnemonic, operand)
+        print("-- %s\t%s" % (deco.mnemonic, operand))
         pc += deco.totalSize
 
 
@@ -1365,7 +1365,7 @@ def disasm(addr, memory):
     pc = addr
     op = memory.getByte(pc)
     mnemonic, _, mode, size = opcodeMapPage1.get(op, None)
-    print "0x%04X %02x -- '%s'" % (pc, memory.getByte(pc), mnemonic)
+    print("0x%04X %02x -- '%s'" % (pc, memory.getByte(pc), mnemonic))
     operand = ''
     xb = None
     lb = None
@@ -1514,7 +1514,7 @@ def disasm(addr, memory):
         else:
             raise NotImplementedError("Fix me!!!")
 
-        print "0x%04X %02X -- %s\t%s" % (pc, op, mnemonic, operand)
+        print("0x%04X %02X -- %s\t%s" % (pc, op, mnemonic, operand))
         operand = ''
 
 
@@ -1669,7 +1669,7 @@ def test():
 
     p = PostbyteDecoder()
     for i in range(256):
-        print p.decode(i)
+        print(p.decode(i))
 
 
 if __name__=='__main__':
