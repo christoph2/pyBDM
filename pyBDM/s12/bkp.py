@@ -29,14 +29,14 @@ __copyright__ = \
 
 
 ## Registers.
-BKP0H   =
-BKP0L   =
-BKP0X   =
-BKPCT0  =
-BKP1X   =
-BKPCT1  =
-BKP1L   =
-BKP1H   =
+#BKP0H   =
+#BKP0L   =
+#BKP0X   =
+#BKPCT0  =
+#BKP1X   =
+#BKPCT1  =
+#BKP1L   =
+#BKP1H   =
 
 def main():
     pass
