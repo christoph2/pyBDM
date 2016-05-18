@@ -1355,7 +1355,7 @@ def dis2(addressFrom, addressTo, memory):
 
         print("0x%04X " % (pc, )),
         for b in deco.rawBytes:
-            print "%02X" % (b, ),
+            print("%02X" % (b, )),
         print("-- %s\t%s" % (deco.mnemonic, operand))
         pc += deco.totalSize
 
