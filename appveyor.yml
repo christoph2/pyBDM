@@ -1,6 +1,6 @@
 environment:
-  COVERALLS_REPO_TOKEN: Yb7og+MtGWZbugeX8/dS3G9NsnI1QGybA3QteozfdZjBGC7b62FsfTyAk/bUvEo/
-    secure: 
+  COVERALLS_REPO_TOKEN: 
+    secure: Yb7og+MtGWZbugeX8/dS3G9NsnI1QGybA3QteozfdZjBGC7b62FsfTyAk/bUvEo/
   CODACY_PROJECT_TOKEN:
     secure: VSIBDOUxQt6/nZfS9PZ+adzryWbCIZ6gP1XDvCEby3yl9T6fgGHBot3ZZz4Z9yKB
 
