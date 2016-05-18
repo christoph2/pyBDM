@@ -6,7 +6,7 @@ __version__="0.1.0"
 __copyright__="""
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2012 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -27,7 +27,7 @@ __copyright__="""
 """
 
 
-IDs={
+IDs = {
     0x0010 : (("MC9S12DP256"),      "0K79X"),
     0x0011 : (("MC9S12DP256"),      "1K79X"),
     0x0012 : (("MC9S12DP256"),      "2K79X"),

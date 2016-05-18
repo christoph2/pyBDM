@@ -6,7 +6,7 @@ __version__ = '0.1.0'
 __copyright__ = """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2015 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -134,24 +134,24 @@ class EEP(Module):
             pass    ## TODO: timeout!
 
     def _eepromCommand(self, command, addr, data):
-        print "FCnfg: %#x" % self.ecnfg
-        print "Fprot: %#x" % self.eprot
-        print "Fstat: %#x %#x" % (self.estat, self.errors())
+        print("ECnfg: %#x" % self.ecnfg)
+        print("Eprot: %#x" % self.eprot)
+        print("Estat: %#x %#x" % (self.estat, self.errors()))
         self._waitReady()
         ## TODO: Check for Address alignment!!!
         self._port.writeWord(addr, data)
 
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         self.ecmd = command
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         self.estat = CBEIF  # Start command.
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         errors = self.errors()
         if errors:
             # TODO: Vernünftiges Errorhandling!!!
-            print "Errors while flashing: %#x" % errors
+            print("Errors while flashing: %#x" % errors)
         else:
-            print "Fstat: %#x %#x" % (self.estat, self.errors())
+            print("Fstat: %#x %#x" % (self.estat, self.errors()))
             #self._waitCompletion()
 
     def eraseBlock(self, block):
@@ -168,14 +168,11 @@ class EEP(Module):
         self.eprot = EPOPEN | EPDIS
         self._port.writeWord(0x0f80, 0xaffe)
 
-        print "Estat: %#x %#x" % (self.estat, self.errors())
+        print("Estat: %#x %#x" % (self.estat, self.errors()))
         self.ecmd = MASS_ERASE
         self.estat = CBEIF
 
-        print "Estat: %#x %#x" % (self.estat, self.errors())
-        #print "!!! FSTAT: %#x !!!" % self.fstat
+        print("Estat: %#x %#x" % (self.estat, self.errors()))
         while (self.estat & CCIF) == 0x00:
             pass
-        #print "!!! FSTAT: %#x !!!" % self.fstat
-        #print
 
