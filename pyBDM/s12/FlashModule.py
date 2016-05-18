@@ -7,7 +7,7 @@ __copyright__ = \
     """
     pyBDM - Library for the Motorola/Freescale Background Debugging Mode.
 
-   (C) 2010-2013 by Christoph Schueler <github.com/Christoph2,
+   (C) 2010-2016 by Christoph Schueler <github.com/Christoph2,
                                         cpu12.gems@googlemail.com>
 
    All Rights Reserved
@@ -190,24 +190,24 @@ class Flash(Module):
             pass    ## TODO: timeout!
 
     def _flashCommand(self, command, addr, data):
-        print "FCnfg: %#x" % self.fcnfg
-        print "Fprot: %#x" % self.fprot
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("FCnfg: %#x" % self.fcnfg)
+        print("Fprot: %#x" % self.fprot)
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         self._waitReady()
         ## TODO: Check for Address alignment!!!
         self._port.writeWord(addr, data)
 
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         self.fcmd = command
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         self.fstat = CBEIF  # Start command.
-        print "Fstat: %#x %#x" % (self.fstat, self.errors())
+        print("Fstat: %#x %#x" % (self.fstat, self.errors()))
         errors = self.errors()
         if errors:
             # TODO: Vernünftiges Errorhandling!!!
-            print "Errors while flashing: %#x" % errors
+            print("Errors while flashing: %#x" % errors)
         else:
-            print "Fstat: %#x %#x" % (self.fstat, self.errors())
+            print("Fstat: %#x %#x" % (self.fstat, self.errors()))
             self._waitCompletion()
 
     def eraseBlock(self, block):
@@ -259,7 +259,7 @@ class Flash(Module):
         self.fstat = CBEIF
         while (self.fstat & CCIF) == 0x00:
             pass
-        print "Finished."
+        print("Finished.")
 
 """
 FTS256:
