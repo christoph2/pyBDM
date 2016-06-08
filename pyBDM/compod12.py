@@ -49,7 +49,7 @@ class ComPod12(BDMBase, serialport.Port):
     DEVICE_NAME = "Elektronik-Laden ComPOD12"
     VARIABLE_BUS_FREQUENCY = False
 
-    def __writeCommand__(self, cmd):
+    def writeCommand(self, cmd):
         self.write(cmd)
         data = self.read(1)
         self.port.flush() # ?
@@ -62,7 +62,7 @@ class ComPod12(BDMBase, serialport.Port):
         else:
             return None
 
-    def __readCommand__(self, cmd, responseLen, addr = None):
+    def readCommand(self, cmd, responseLen, addr = None):
         self.write(cmd)
         if not addr is None:
             self.write((addr >> 8) & 0xff)
@@ -75,8 +75,8 @@ class ComPod12(BDMBase, serialport.Port):
             raise InvalidResponseError
         return data
 
-    def __readWord__(self, cmd, addr = None):
-        data = self.__readCommand__(cmd, 2, addr)
+    def readWord(self, cmd, addr = None):
+        data = self.readCommand(cmd, 2, addr)
         self.port.flush() # ?
         if data == bytearray():
             raise NoResponseError
@@ -84,7 +84,7 @@ class ComPod12(BDMBase, serialport.Port):
             raise InvalidResponseError
         return data[0] << 8 | data[1]
 
-    def __writeWord__(self, cmd, data0, data1 = None):
+    def writeWord(self, cmd, data0, data1 = None):
         self.write(cmd)
         self.write((data0 >> 8) & 0xff)
         self.write(data0 & 0xff)
@@ -98,7 +98,7 @@ class ComPod12(BDMBase, serialport.Port):
         if (d[0] != com(cmd)):
             raise InvalidResponseError
 
-    def __writeByte__(self, cmd, addr, data):
+    def writeByte(self, cmd, addr, data):
         self.write(cmd)
         self.write((addr >> 8) & 0xff)
         self.write(addr & 0xff)
@@ -112,13 +112,13 @@ class ComPod12(BDMBase, serialport.Port):
 
     def reset(self):
         self.logger.debug("RESET")
-        self.__writeCommand__(RESET)
+        self.writeCommand(RESET)
 
     def getPODVersion(self):
-        data = self.__readCommand__(VERSION, 2)
+        data = self.readCommand(VERSION, 2)
         return "%s v%02u.%02u" % (self.DEVICE_NAME, data[0], data[1])
 
-    def __readArea__(self, addr, length):
+    def readArea(self, addr, length):
         self.write(READ_AREA)
         self.write((addr >> 8) & 0xff)
         self.write(addr & 0xff)
@@ -132,7 +132,7 @@ class ComPod12(BDMBase, serialport.Port):
             raise InvalidResponseError("Expected %u bytes got %u." % (length, len(data)))
         return data
 
-    def __writeArea__(self, addr, length, data):
+    def writeArea(self, addr, length, data):
         self.write(WRITE_AREA)
         self.write((addr >> 8) & 0xff)
         self.write(addr & 0xff)

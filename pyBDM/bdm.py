@@ -115,7 +115,7 @@ class BDMBase(object):
                Go to user program.  If enabled, ACK will occur when leaving active background mode.
         """
         self.logger.debug("GO")
-        self.__writeCommand__(GO)
+        self.writeCommand(GO)
 
     def targetGoUntil(self):
         """ ..  py:method:: targetGoUntil(self)
@@ -123,7 +123,7 @@ class BDMBase(object):
                Go to user program. If enabled, ACK will occur upon returning to active background mode.
         """
         self.logger.debug("GO_UNTIL")
-        self.__writeCommand__(GO_UNTIL)
+        self.writeCommand(GO_UNTIL)
 
     def targetTagGo(self):
         """ ..  py:method:: targetTagGo(self)
@@ -131,7 +131,7 @@ class BDMBase(object):
                Enable tagging and go to user program. There is no ACK pulse related to this command.
         """
         self.logger.debug("TAGGO")
-        self.__writeCommand__(TAGGO)
+        self.writeCommand(TAGGO)
 
     def targetHalt(self):
         """ ..  py:method:: targetHalt(self)
@@ -139,7 +139,7 @@ class BDMBase(object):
                Enter background mode if firmware enabled.
         """
         self.logger.debug("BACKGROUND")
-        self.__writeCommand__(BACKGROUND)
+        self.writeCommand(BACKGROUND)
 
     def targetAckEnable(self):
         """ ..  py:method:: targetAckEnable(self)
@@ -147,7 +147,7 @@ class BDMBase(object):
                Enable Handshake. Issues an ACK pulse after the command is executed.
         """
         self.logger.debug("ACK_ENABLE")
-        self.__writeCommand__(ACK_ENABLE)
+        self.writeCommand(ACK_ENABLE)
 
     def targetAckDisable(self):
         """ ..  py:method:: targetAckDisable(self)
@@ -155,7 +155,7 @@ class BDMBase(object):
                Disable Handshake. This command does not issue an ACK pulse.
         """
         self.logger.debug("ACK_DISABLE")
-        self.__writeCommand__(ACK_DISABLE)
+        self.writeCommand(ACK_DISABLE)
 
     def readBDWord(self, addr):
         """ ..  py:method:: readBDWord(addr)
@@ -167,7 +167,7 @@ class BDMBase(object):
                 :rtype: integer
         """
         self.logger.debug("READ_BD_WORD[0x%04x]" % addr)
-        data = self.__readWord__(READ_BD_WORD, addr)
+        data = self.readWord(READ_BD_WORD, addr)
         self.logger.debug("RESULT: 0x%04x" % data)
         return data
 
@@ -175,7 +175,7 @@ class BDMBase(object):
         """ ..  py:method::
         """
         self.logger.debug("READ_WORD[0x%04x]" % addr)
-        data = self.__readWord__(READ_WORD, addr)
+        data = super(BDMBase, self).readWord(READ_WORD, addr)
         self.logger.debug("RESULT: 0x%04x" % data)
         return data
 
@@ -183,7 +183,7 @@ class BDMBase(object):
         """ ..  py:method::
         """
         self.logger.debug("READ_BD_BYTE[0x%04x]" % addr)
-        data = self.__readCommand__(READ_BD_BYTE, 1, addr)[0]
+        data = self.readCommand(READ_BD_BYTE, 1, addr)[0]
         self.logger.debug("RESULT: 0x%02x" % data)
         return data
 
@@ -191,7 +191,7 @@ class BDMBase(object):
         """ ..  py:method::
         """
         self.logger.debug("READ_BYTE[0x%04x]" % addr)
-        data = self.__readCommand__(READ_BYTE, 1, addr)[0]
+        data = self.readCommand(READ_BYTE, 1, addr)[0]
         self.logger.debug("RESULT: 0x%02x" % data)
         return data
 
@@ -199,97 +199,97 @@ class BDMBase(object):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_BD_WORD[0x%04x]=0x%04x" % (addr, data))
-        self.__writeWord__(WRITE_BD_WORD, addr, data)
+        self.writeWord(WRITE_BD_WORD, addr, data)
 
     def writeBDByte(self, addr, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_BD_BYTE[0x%04x]=0x%02x" % (addr, data))
-        self.__writeByte__(WRITE_BD_BYTE,addr, data)
+        self.writeByte(WRITE_BD_BYTE,addr, data)
 
     def writeByte(self, addr, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_BYTE[0x%04x]=0x%02x" % (addr, data))
-        self.__writeByte__(WRITE_BYTE, addr, data)
+        super(BDMBase, self).writeByte(WRITE_BYTE, addr, data)
 
     def writeWord(self, addr, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_WORD[0x%04x]=0x%04x" % (addr, data))
-        self.__writeWord__(WRITE_WORD, addr, data)
+        super(BDMBase, self).writeWord(WRITE_WORD, addr, data)
 
     def readNext(self):
         """ ..  py:method::
         """
         self.logger.debug("READ_NEXT")
-        return self.__readWord__(READ_NEXT)
+        return self.readWord(READ_NEXT)
 
     def writeNext(self,data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_NEXT[0x%04x]" % data)
-        self.__writeWord__(WRITE_NEXT, data)
+        self.writeWord(WRITE_NEXT, data)
 
     def readPC(self):
         """ ..  py:method::
         """
         self.logger.debug("READ_PC")
-        return self.__readWord__(READ_PC)
+        return self.readWord(READ_PC)
 
     def readD(self):
         """ ..  py:method::
         """
         self.logger.debug("READ_D")
-        return self.__readWord__(READ_D)
+        return self.readWord(READ_D)
 
     def readX(self):
         """ ..  py:method::
         """
         self.logger.debug("READ_X")
-        return self.__readWord__(READ_X)
+        return self.readWord(READ_X)
 
     def readY(self):
         """ ..  py:method::
         """
         self.logger.debug("READ_Y")
-        return self.__readWord__(READ_Y)
+        return self.readWord(READ_Y)
 
     def readSP(self):
         """ ..  py:method::
         """
         self.logger.debug("READ_SP")
-        return self.__readWord__(READ_SP)
+        return self.readWord(READ_SP)
 
     def writePC(self, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_PC[0x{0:04x}]".format(data))
-        self.__writeWord__(WRITE_PC, data)
+        self.writeWord(WRITE_PC, data)
 
     def writeD(self, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_D[0x{0:04x}]".format(data))
-        self.__writeWord__(WRITE_D, data)
+        self.writeWord(WRITE_D, data)
 
     def writeX(self, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_X[0x{0:04x}]".format(data))
-        self.__writeWord__(WRITE_X, data)
+        self.writeWord(WRITE_X, data)
 
     def writeY(self, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_Y[0x{0:04x}]".format(data))
-        self.__writeWord__(WRITE_Y, data)
+        self.writeWord(WRITE_Y, data)
 
     def writeSP(self, data):
         """ ..  py:method::
         """
         self.logger.debug("WRITE_SP[0x{0:04x}]".format(data))
-        self.__writeWord__(WRITE_SP, data)
+        self.writeWord(WRITE_SP, data)
 
 ##
 ## Convenience Methods.
@@ -344,13 +344,13 @@ class BDMBase(object):
         result = bytearray()
         for l in range(loops):
             self.logger.debug("Reading %u bytes starting @ 0x%04x." % (self.MAX_READ_PAYLOAD, offset))
-            data = self.__readArea__(offset, self.MAX_READ_PAYLOAD)
+            data = self.readArea(offset, self.MAX_READ_PAYLOAD)
             self.logger.debug("[%s]" % hexDump(data))
             result.extend(data)
             offset += self.MAX_READ_PAYLOAD
         if bytesRemaining:
             self.logger.debug("Reading %u bytes starting @ 0x%04x." % (bytesRemaining, offset))
-            data = self.__readArea__(offset,bytesRemaining)
+            data = self.readArea(offset,bytesRemaining)
             self.logger.debug("[%s]" % hexDump(data))
             result.extend(data)
         return result
@@ -365,11 +365,11 @@ class BDMBase(object):
         offset = addr
         for l in range(loops):
             self.logger.debug("Filling %u bytes with 0x%02x starting @ 0x%04x." % (self.MAX_WRITE_PAYLOAD, value, offset))
-            self.__writeArea__(offset, self.MAX_WRITE_PAYLOAD, [value] * self.MAX_WRITE_PAYLOAD)
+            self.writeArea(offset, self.MAX_WRITE_PAYLOAD, [value] * self.MAX_WRITE_PAYLOAD)
             offset += self.MAX_WRITE_PAYLOAD
         if bytesRemaining:
             self.logger.debug("Filling %u bytes with 0x%02x starting @ 0x%04x." % (bytesRemaining, value, offset))
-            self.__writeArea__(offset, bytesRemaining, [value] * bytesRemaining)
+            self.writeArea(offset, bytesRemaining, [value] * bytesRemaining)
 
     def writeArea(self, addr, data):
         """ ..  py:method::
@@ -387,7 +387,7 @@ class BDMBase(object):
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (self.MAX_WRITE_PAYLOAD, addrOffset))
             dslice = data[dataOffsetFrom : dataOffsetTo]
             self.logger.debug("[%s]" % hexDump(dslice))
-            self.__writeArea__(addrOffset, self.MAX_WRITE_PAYLOAD, dslice)
+            super(BDMBase, self).writeArea(addrOffset, self.MAX_WRITE_PAYLOAD, dslice)
             addrOffset += self.MAX_WRITE_PAYLOAD
             dataOffsetFrom = dataOffsetTo
             dataOffsetTo = dataOffsetFrom + self.MAX_WRITE_PAYLOAD
@@ -395,7 +395,7 @@ class BDMBase(object):
             self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
             dslice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
             self.logger.debug("[%s]" % hexDump(dslice))
-            self.__writeArea__(addrOffset, bytesRemaining, dslice)
+            super(BDMBase, self).writeArea(addrOffset, bytesRemaining, dslice)
 
     def getPPage(self):
         """ ..  py:method::
