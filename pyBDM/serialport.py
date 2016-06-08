@@ -31,7 +31,7 @@ import serial
 import types
 
 class PortException(serial.SerialException): pass
-from pyBDM.bdm import slicer
+from pyBDM.utils import slicer
 
 def dumpa(arr):
     return [s for s in slicer(arr, 2)]

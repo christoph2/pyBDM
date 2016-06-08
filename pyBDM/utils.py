@@ -42,6 +42,15 @@ def createStringBuffer(*args):
     """
     return StringIO(*args)
 
+def slicer(iteratable, sliceLength, resultType = None):
+    if resultType is None:
+        resultType = type(iteratable)
+    length = len(iteratable)
+    return [resultType(iteratable[i : i + sliceLength]) for i in range(0, length, sliceLength)]
+
+def hexDump(arr):
+    return ' '.join([("0x%02x" % x) for x in arr])
+
 def setBits(value, mask):
     return value | mask
 

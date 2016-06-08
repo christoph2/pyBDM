@@ -87,16 +87,6 @@ PPAGE           = 0x30
 from collections import namedtuple
 MemorySizes = namedtuple('MemorySizes','regSpace eepSpace ramSpace allocRomSpace')
 
-def slicer(iteratable, sliceLength, resultType = None):
-    if resultType is None:
-        resultType = type(iteratable)
-    length = len(iteratable)
-    return [resultType(iteratable[i : i + sliceLength]) for i in range(0, length, sliceLength)]
-
-
-def hexDump(arr):
-    return ' '.join([("0x%02x" % x) for x in arr])
-
 class CommunicationError(Exception): pass
 
 
