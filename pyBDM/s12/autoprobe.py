@@ -85,7 +85,7 @@ def probeHC12(port):
     initRM, initRE, misc = port.readByte(INITRM), port.readByte(INITRE), port.readByte(MISC)
     derivate = DERIVATES.get((initRM, initRE, misc),'*** UNKNOWN ***')  ## FixMe
 
-    port.logger.info("%s" % derivate)
+    port.logger.info("{0!s}".format(derivate))
 
     if (initRM, initRE, misc)== (0x20, 0x01, 0x0d):
         ppageOld = port.readByte(PPAGE)

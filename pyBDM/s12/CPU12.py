@@ -1270,11 +1270,11 @@ def decodeMove(deco):
         elif mode == 'im-ex':
             imm = bytes_[0]
             ext = makeword(bytes_[1], bytes_[2])
-            operand = "#$%02X, $%04X" % (imm, ext)
+            operand = "#${0:02X}, ${1:04X}".format(imm, ext)
         elif mode == 'ex-ex':
             extDest = makeword(bytes_[0], bytes_[1])
             extSrc = makeword(bytes_[2], bytes_[3])
-            operand = "$%04X, $%04X" % (extSrc, extDest)
+            operand = "${0:04X}, ${1:04X}".format(extSrc, extDest)
         elif mode == 'id-ex':
             idSrc = bytes_[0]
             ext = makeword(bytes_[1], bytes_[2])
@@ -1291,11 +1291,11 @@ def decodeMove(deco):
         elif mode == 'im-ex':
             imm = makeword(bytes_[0], bytes_[1])
             ext = makeword(bytes_[2], bytes_[3])
-            operand = "#$%04X, $%04X" % (imm, ext)
+            operand = "#${0:04X}, ${1:04X}".format(imm, ext)
         elif mode == 'ex-ex':
             extDest = makeword(bytes_[0], bytes_[1])
             extSrc = makeword(bytes_[2], bytes_[3])
-            operand = "$%04X, $%04X" % (extSrc, extDest)
+            operand = "${0:04X}, ${1:04X}".format(extSrc, extDest)
         elif mode == 'id-ex':
             idSrc = bytes_[0]
             ext = makeword(bytes_[1], bytes_[2])
@@ -1308,27 +1308,27 @@ def dis2(addressFrom, addressTo, memory):
         operand = ''
         deco = preDecode(pc, memory)
         if deco.mnemonic == '*tfr/exg*':
-            deco.mnemonic = "%s" % ("TFR" if deco.bytes_[0] <= 0x80 else "EXG")
-            operand = "%s" % (EB[deco.bytes_[0]])
+            deco.mnemonic = "{0!s}".format(("TFR" if deco.bytes_[0] <= 0x80 else "EXG"))
+            operand = "{0!s}".format((EB[deco.bytes_[0]]))
         if deco.mode == IH:
             pass
         elif deco.mode == SPECIAL:
             pass
         elif  deco.mode == IM:
             if deco.totalSize == 2:
-                operand = '#$%02X' % deco.bytes_[0]
+                operand = '#${0:02X}'.format(deco.bytes_[0])
             elif deco.totalSize == 3:
-                operand = '#$%04X' % ((deco.bytes_[0] << 8) | deco.bytes_[1],)
+                operand = '#${0:04X}'.format((deco.bytes_[0] << 8) | deco.bytes_[1])
         elif deco.mode == DI:
-            operand = '$%02X' % (deco.bytes_[0])
+            operand = '${0:02X}'.format((deco.bytes_[0]))
         elif deco.mode == EX:
             if isBitFunction(deco.mnemonic):
-                operand = '$%04X #$%02X' % ((deco.bytes_[0] << 8) | deco.bytes_[1], deco.bytes_[2])
+                operand = '${0:04X} #${1:02X}'.format((deco.bytes_[0] << 8) | deco.bytes_[1], deco.bytes_[2])
             elif isBitBranchFunction(deco.mnemonic):
                 rel = signedByte(deco.bytes_[3])
-                operand = "$%04X, #$%02X, $%04X" % ((deco.bytes_[0] << 8) | deco.bytes_[1], deco.bytes_[2],  (pc + 5 + rel))
+                operand = "${0:04X}, #${1:02X}, ${2:04X}".format((deco.bytes_[0] << 8) | deco.bytes_[1], deco.bytes_[2], (pc + 5 + rel))
             else:
-                operand = '$%04X' % ((deco.bytes_[0] << 8) | deco.bytes_[1],)
+                operand = '${0:04X}'.format((deco.bytes_[0] << 8) | deco.bytes_[1])
         elif deco.mode == ID:
             pass
         elif deco.mode == RL:
@@ -1337,15 +1337,15 @@ def dis2(addressFrom, addressTo, memory):
                     lb = LB[deco.bytes_[0]] # DBNE    Y,467B     0436FC
                     rel = signedByte(deco.bytes_[1])
 
-                    operand = "%s,$%04X" % (lb[1], (pc + 2 + rel))
+                    operand = "{0!s},${1:04X}".format(lb[1], (pc + 2 + rel))
                     mnemonic = lb[0]
                 except:
                     mnemonic = "TRAP"
-                    operand = "($%02x $%02x)" % (deco.opcode, deco.bytes_[0])
+                    operand = "(${0:02x} ${1:02x})".format(deco.opcode, deco.bytes_[0])
                 deco.mnemonic = mnemonic
             else:
                 rel = signedByte(deco.bytes_[0])
-                operand = "0x%04X" % (pc + 2 + rel)
+                operand = "0x{0:04X}".format((pc + 2 + rel))
         elif isMoveFunction(deco.mnemonic):
             operand = decodeMove(deco)
         elif deco.mnemonic == 'CALL':
@@ -1353,10 +1353,10 @@ def dis2(addressFrom, addressTo, memory):
         else:
             pass
 
-        print("0x%04X " % (pc, )),
+        print("0x{0:04X} ".format(pc )),
         for b in deco.rawBytes:
-            print("%02X" % (b, )),
-        print("-- %s\t%s" % (deco.mnemonic, operand))
+            print("{0:02X}".format(b )),
+        print("-- {0!s}\t{1!s}".format(deco.mnemonic, operand))
         pc += deco.totalSize
 
 
@@ -1365,7 +1365,7 @@ def disasm(addr, memory):
     pc = addr
     op = memory.getByte(pc)
     mnemonic, _, mode, size = opcodeMapPage1.get(op)
-    print("0x%04X %02x -- '%s'" % (pc, memory.getByte(pc), mnemonic))
+    print("0x{0:04X} {1:02x} -- '{2!s}'".format(pc, memory.getByte(pc), mnemonic))
     operand = ''
     xb = None
     lb = None
@@ -1388,9 +1388,9 @@ def disasm(addr, memory):
             pass
         elif mode == IM:
             if size == 2:
-                operand = '#$%02X' % memory.getByte(pc + 1)
+                operand = '#${0:02X}'.format(memory.getByte(pc + 1))
             elif size == 3:
-                operand = '#$%04X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2),)
+                operand = '#${0:04X}'.format((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2))
             else:
                 raise NotImplementedError()
         elif mode == ID:
@@ -1453,11 +1453,11 @@ def disasm(addr, memory):
         elif mode == EX:
             if isBitFunction(mnemonic):
                 # 0x56BF 1C -- BSET $2087   // 0x56BF   1C208707      BSET    2087 #07
-                operand = '$%04X #$%02X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2), memory.getByte(pc + 3))
+                operand = '${0:04X} #${1:02X}'.format((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2), memory.getByte(pc + 3))
             elif isBitBranchFunction(mnemonic):
                 pass
             else:
-                operand = '$%04X' % ((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2),)
+                operand = '${0:04X}'.format((memory.getByte(pc + 1) << 8) | memory.getByte(pc + 2))
         elif mode == RL:
             if op == LOOP:
                 try:
@@ -1465,48 +1465,48 @@ def disasm(addr, memory):
                     rel = memory.getByte(pc + 2)
                     if rel >= 0x80: # todo: Factor out!!!
                         rel = -((~rel & 0xff) + 1)
-                    operand = "%s,$%04X" % (lb[1], (pc + 2 + rel))
+                    operand = "{0!s},${1:04X}".format(lb[1], (pc + 2 + rel))
                     mnemonic = lb[0]
                 except:
                     mnemonic = "TRAP"
-                    operand = "($%02x $%02x)" % (op, memory.getByte(pc + 1))
+                    operand = "(${0:02x} ${1:02x})".format(op, memory.getByte(pc + 1))
             else:
                 rel = memory.getByte(pc + 1)
                 if rel >= 0x80: # todo: Factor out!!!
                     rel = -((~rel & 0xff) + 1)
-                operand = "0x%04X" % (pc + 2 + rel)
+                operand = "0x{0:04X}".format((pc + 2 + rel))
         elif mode == SPECIAL:
             pass
         elif mode == DI:
-            operand = '$%02X' % (memory.getByte(pc + 1))
+            operand = '${0:02X}'.format((memory.getByte(pc + 1)))
         elif isinstance(mode, basestring):
             if mode == 'im-id':
                 xb = XB[memory.getByte(pc + 2)]
                 if size == 4:
-                    operand = "#$%02X %s" % ((memory.getByte(pc + 3)), xb[0])
+                    operand = "#${0:02X} {1!s}".format((memory.getByte(pc + 3)), xb[0])
                 elif size == 5:
-                    operand = "#$%04X %s" % (((memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4))), xb[0])
+                    operand = "#${0:04X} {1!s}".format(((memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4))), xb[0])
                 else:
                     raise NotImplementedError()
             elif mode == 'ex-id':
                 xb = XB[memory.getByte(pc + 2)]
-                operand = "$%04X %s" % (((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)), xb[0])
+                operand = "${0:04X} {1!s}".format(((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)), xb[0])
             elif mode == 'id-id':
                 xb1 = XB[memory.getByte(pc + 2)]
                 xb2 = XB[memory.getByte(pc + 3)]
-                operand = "%s %s" % (xb1[0], xb2[0])
+                operand = "{0!s} {1!s}".format(xb1[0], xb2[0])
             elif mode == 'im-ex':
                 if size == 5:
-                    operand = "#$%02X,$%04X" % (memory.getByte(pc + 2), (memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4)))
+                    operand = "#${0:02X},${1:04X}".format(memory.getByte(pc + 2), (memory.getByte(pc + 3) << 8) | (memory.getByte(pc + 4)))
                 elif size == 6:
-                    operand = "#$%04X,$%04X" % (((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | memory.getByte(pc + 5))
+                    operand = "#${0:04X},${1:04X}".format(((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | memory.getByte(pc + 5))
                 else:
                     raise NotImplementedError("???")
             elif mode == 'ex-ex':
-                operand = "$%04X,$%04X" % (((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | (memory.getByte(pc + 5)))
+                operand = "${0:04X},${1:04X}".format(((memory.getByte(pc + 2) << 8) |  (memory.getByte(pc + 3))), (memory.getByte(pc + 4) << 8) | (memory.getByte(pc + 5)))
             elif mode == 'id-ex':
                 xb = XB[memory.getByte(pc + 2)]
-                operand = "%s $%04X" % (xb[0], ((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)))
+                operand = "{0!s} ${1:04X}".format(xb[0], ((memory.getByte(pc + 3) << 8) | memory.getByte(pc + 4)))
             else:
                 raise NotImplementedError("Invalid Addressing Mode.")
             lhs, rhs = mode.split('-')
@@ -1514,7 +1514,7 @@ def disasm(addr, memory):
         else:
             raise NotImplementedError("Fix me!!!")
 
-        print("0x%04X %02X -- %s\t%s" % (pc, op, mnemonic, operand))
+        print("0x{0:04X} {1:02X} -- {2!s}\t{3!s}".format(pc, op, mnemonic, operand))
         operand = ''
 
 
@@ -1522,9 +1522,9 @@ def main():
     pod = ComPod12(0x0, 38400)
     pod.connect()
     pod.logger.debug('=' * 50)
-    pod.logger.debug("STARTING '%s'." % os.path.split(sys.argv[0x0])[0x1])
+    pod.logger.debug("STARTING '{0!s}'.".format(os.path.split(sys.argv[0x0])[0x1]))
     pod.logger.debug('=' * 50)
-    pod.logger.info("BDM-POD: '%s'." % pod.getPODVersion())
+    pod.logger.info("BDM-POD: '{0!s}'.".format(pod.getPODVersion()))
     pod.reset()
 #    c.writeX(0xaffe)
     pod.targetHalt()
@@ -1594,18 +1594,18 @@ class PostbyteDecoder(object):
     @classmethod
     def sixteenBitOffsetIndexedIndirect(cls, postbyte):
         rr = cls.RR[(postbyte & 0x18) >> 3]
-        return "[%%s,%s]" % (rr, )
+        return "[%s,{0!s}]".format(rr )
 
     @classmethod
     def accuDOffsetIndexedIndirect(cls, postbyte):
         rr = cls.RR[(postbyte & 0x18) >> 3]
-        return "[D,%s]" % rr
+        return "[D,{0!s}]".format(rr)
 
     @classmethod
     def accuOffset(cls, postbyte):
         rr = cls.RR[(postbyte & 0x18) >> 3]
         aa = cls.AA[(postbyte & 0x3)]
-        return "%s,%s" % (aa, rr)
+        return "{0!s},{1!s}".format(aa, rr)
 
     @classmethod
     def constantOffset(cls, postbyte):
@@ -1613,7 +1613,7 @@ class PostbyteDecoder(object):
         z = (postbyte & 0x02) >> 1
         #s = postbyte & 0x01
         sign = "-" if postbyte & 0x01 else ""
-        return "%s%%s,%s" % (sign, rr, )
+        return "{0!s}%s,{1!s}".format(sign, rr )
 
     @classmethod
     def autoPrePostIncDec(cls, postbyte):
@@ -1626,10 +1626,10 @@ class PostbyteDecoder(object):
             n = (postbyte & 0x07) + 1
             sign = '+'
         if p ==  1:
-            t = '%s%s' % (rr, sign)
+            t = '{0!s}{1!s}'.format(rr, sign)
         else:
-            t = '%s%s' % (sign, rr)
-        fmt = "%s,%s" % (n, t)
+            t = '{0!s}{1!s}'.format(sign, rr)
+        fmt = "{0!s},{1!s}".format(n, t)
         return fmt
 
     @classmethod
@@ -1638,7 +1638,7 @@ class PostbyteDecoder(object):
         n = (postbyte & 0x1f)
         if (n & 0x10) == 0x10:
             n = - (16 - (n & 0x0f))
-        return "%s,%s" % (n, rr)
+        return "{0!s},{1!s}".format(n, rr)
 
 
 
