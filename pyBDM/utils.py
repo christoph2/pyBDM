@@ -49,7 +49,7 @@ def slicer(iteratable, sliceLength, resultType = None):
     return [resultType(iteratable[i : i + sliceLength]) for i in range(0, length, sliceLength)]
 
 def hexDump(arr):
-    return ' '.join([("0x%02x" % x) for x in arr])
+    return ' '.join([("0x{0:02x}".format(x)) for x in arr])
 
 def setBits(value, mask):
     return value | mask

@@ -116,7 +116,7 @@ class ComPod12(BDMBase, serialport.Port):
 
     def getPODVersion(self):
         data = self.readCommand(VERSION, 2)
-        return "%s v%02u.%02u" % (self.DEVICE_NAME, data[0], data[1])
+        return "{0!s} v{1:02d}.{2:02d}".format(self.DEVICE_NAME, data[0], data[1])
 
     def readArea(self, addr, length):
         self.write(READ_AREA)
@@ -129,7 +129,7 @@ class ComPod12(BDMBase, serialport.Port):
             raise NoResponseError
         if len(data) != length:
             #print "Expected: %u Actual %u" % (length, len(data))
-            raise InvalidResponseError("Expected %u bytes got %u." % (length, len(data)))
+            raise InvalidResponseError("Expected {0:d} bytes got {1:d}.".format(length, len(data)))
         return data
 
     def writeArea(self, addr, length, data):

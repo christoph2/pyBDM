@@ -158,9 +158,9 @@ class Bkp(Module):
 
     def setupDualBreakpoints(breakpoint0 = "full", rw0 = "rw", breakpoint1 = "full", rw1 = "rw"):
         if breakpoint0 not in BREAKPOINT_MODES:
-            raise ValueError("breakpoint0: %s" % breakpoint0)
+            raise ValueError("breakpoint0: {0!s}".format(breakpoint0))
         if breakpoint0 not in BREAKPOINT_MODES:
-            raise ValueError("breakpoint1: %s" % breakpoint1)
+            raise ValueError("breakpoint1: {0!s}".format(breakpoint1))
         value = 0x00
         value |= BREAKPOINT_MODES[breakpoint0] << 6
         value |= BREAKPOINT_MODES[breakpoint1] << 4
@@ -170,9 +170,9 @@ class Bkp(Module):
 
     def setupFullBreakpoint(breakpoint = "full", rw = "rw", dataBreakpoint = "non", drw = "rw"):
         if breakpoint not in BREAKPOINT_MODES:
-            raise ValueError("breakpoint: %s" % breakpoint)
+            raise ValueError("breakpoint: {0!s}".format(breakpoint))
         if dataBreakpoint not in DATA_COMPARE_MODES:
-            raise ValueError("dataBreakpoint: %s" % dataBreakpoint)
+            raise ValueError("dataBreakpoint: {0!s}".format(dataBreakpoint))
         value = 0x00
         value |= BREAKPOINT_MODES[breakpoint] << 6
         value |= DATA_COMPARE_MODES[dataBreakpoint] << 4

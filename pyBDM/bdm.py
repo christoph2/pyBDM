@@ -166,57 +166,57 @@ class BDMBase(object):
                 :type addr: integer
                 :rtype: integer
         """
-        self.logger.debug("READ_BD_WORD[0x%04x]" % addr)
+        self.logger.debug("READ_BD_WORD[0x{0:04x}]".format(addr))
         data = self.readWord(READ_BD_WORD, addr)
-        self.logger.debug("RESULT: 0x%04x" % data)
+        self.logger.debug("RESULT: 0x{0:04x}".format(data))
         return data
 
     def readWord(self, addr):
         """ ..  py:method::
         """
-        self.logger.debug("READ_WORD[0x%04x]" % addr)
+        self.logger.debug("READ_WORD[0x{0:04x}]".format(addr))
         data = super(BDMBase, self).readWord(READ_WORD, addr)
-        self.logger.debug("RESULT: 0x%04x" % data)
+        self.logger.debug("RESULT: 0x{0:04x}".format(data))
         return data
 
     def readBDByte(self, addr):
         """ ..  py:method::
         """
-        self.logger.debug("READ_BD_BYTE[0x%04x]" % addr)
+        self.logger.debug("READ_BD_BYTE[0x{0:04x}]".format(addr))
         data = self.readCommand(READ_BD_BYTE, 1, addr)[0]
-        self.logger.debug("RESULT: 0x%02x" % data)
+        self.logger.debug("RESULT: 0x{0:02x}".format(data))
         return data
 
     def readByte(self, addr):
         """ ..  py:method::
         """
-        self.logger.debug("READ_BYTE[0x%04x]" % addr)
+        self.logger.debug("READ_BYTE[0x{0:04x}]".format(addr))
         data = self.readCommand(READ_BYTE, 1, addr)[0]
-        self.logger.debug("RESULT: 0x%02x" % data)
+        self.logger.debug("RESULT: 0x{0:02x}".format(data))
         return data
 
     def writeBDWord(self, addr, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_BD_WORD[0x%04x]=0x%04x" % (addr, data))
+        self.logger.debug("WRITE_BD_WORD[0x{0:04x}]=0x{1:04x}".format(addr, data))
         self.writeWord(WRITE_BD_WORD, addr, data)
 
     def writeBDByte(self, addr, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_BD_BYTE[0x%04x]=0x%02x" % (addr, data))
+        self.logger.debug("WRITE_BD_BYTE[0x{0:04x}]=0x{1:02x}".format(addr, data))
         self.writeByte(WRITE_BD_BYTE,addr, data)
 
     def writeByte(self, addr, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_BYTE[0x%04x]=0x%02x" % (addr, data))
+        self.logger.debug("WRITE_BYTE[0x{0:04x}]=0x{1:02x}".format(addr, data))
         super(BDMBase, self).writeByte(WRITE_BYTE, addr, data)
 
     def writeWord(self, addr, data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_WORD[0x%04x]=0x%04x" % (addr, data))
+        self.logger.debug("WRITE_WORD[0x{0:04x}]=0x{1:04x}".format(addr, data))
         super(BDMBase, self).writeWord(WRITE_WORD, addr, data)
 
     def readNext(self):
@@ -228,7 +228,7 @@ class BDMBase(object):
     def writeNext(self,data):
         """ ..  py:method::
         """
-        self.logger.debug("WRITE_NEXT[0x%04x]" % data)
+        self.logger.debug("WRITE_NEXT[0x{0:04x}]".format(data))
         self.writeWord(WRITE_NEXT, data)
 
     def readPC(self):
@@ -343,15 +343,15 @@ class BDMBase(object):
         offset = addr
         result = bytearray()
         for l in range(loops):
-            self.logger.debug("Reading %u bytes starting @ 0x%04x." % (self.MAX_READ_PAYLOAD, offset))
+            self.logger.debug("Reading {0:d} bytes starting @ 0x{1:04x}.".format(self.MAX_READ_PAYLOAD, offset))
             data = self.readArea(offset, self.MAX_READ_PAYLOAD)
-            self.logger.debug("[%s]" % hexDump(data))
+            self.logger.debug("[{0!s}]".format(hexDump(data)))
             result.extend(data)
             offset += self.MAX_READ_PAYLOAD
         if bytesRemaining:
-            self.logger.debug("Reading %u bytes starting @ 0x%04x." % (bytesRemaining, offset))
+            self.logger.debug("Reading {0:d} bytes starting @ 0x{1:04x}.".format(bytesRemaining, offset))
             data = self.readArea(offset,bytesRemaining)
-            self.logger.debug("[%s]" % hexDump(data))
+            self.logger.debug("[{0!s}]".format(hexDump(data)))
             result.extend(data)
         return result
 
@@ -364,11 +364,11 @@ class BDMBase(object):
         bytesRemaining = length % self.MAX_WRITE_PAYLOAD
         offset = addr
         for l in range(loops):
-            self.logger.debug("Filling %u bytes with 0x%02x starting @ 0x%04x." % (self.MAX_WRITE_PAYLOAD, value, offset))
+            self.logger.debug("Filling {0:d} bytes with 0x{1:02x} starting @ 0x{2:04x}.".format(self.MAX_WRITE_PAYLOAD, value, offset))
             self.writeArea(offset, self.MAX_WRITE_PAYLOAD, [value] * self.MAX_WRITE_PAYLOAD)
             offset += self.MAX_WRITE_PAYLOAD
         if bytesRemaining:
-            self.logger.debug("Filling %u bytes with 0x%02x starting @ 0x%04x." % (bytesRemaining, value, offset))
+            self.logger.debug("Filling {0:d} bytes with 0x{1:02x} starting @ 0x{2:04x}.".format(bytesRemaining, value, offset))
             self.writeArea(offset, bytesRemaining, [value] * bytesRemaining)
 
     def writeArea(self, addr, data):
@@ -384,17 +384,17 @@ class BDMBase(object):
         dataOffsetFrom = 0
         dataOffsetTo = self.MAX_WRITE_PAYLOAD
         for l in range(loops):
-            self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (self.MAX_WRITE_PAYLOAD, addrOffset))
+            self.logger.debug('Writing {0:d} bytes starting @ 0x{1:04x}.'.format(self.MAX_WRITE_PAYLOAD, addrOffset))
             dslice = data[dataOffsetFrom : dataOffsetTo]
-            self.logger.debug("[%s]" % hexDump(dslice))
+            self.logger.debug("[{0!s}]".format(hexDump(dslice)))
             super(BDMBase, self).writeArea(addrOffset, self.MAX_WRITE_PAYLOAD, dslice)
             addrOffset += self.MAX_WRITE_PAYLOAD
             dataOffsetFrom = dataOffsetTo
             dataOffsetTo = dataOffsetFrom + self.MAX_WRITE_PAYLOAD
         if bytesRemaining:
-            self.logger.debug('Writing %u bytes starting @ 0x%04x.' % (bytesRemaining, addrOffset))
+            self.logger.debug('Writing {0:d} bytes starting @ 0x{1:04x}.'.format(bytesRemaining, addrOffset))
             dslice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
-            self.logger.debug("[%s]" % hexDump(dslice))
+            self.logger.debug("[{0!s}]".format(hexDump(dslice)))
             super(BDMBase, self).writeArea(addrOffset, bytesRemaining, dslice)
 
     def getPPage(self):
