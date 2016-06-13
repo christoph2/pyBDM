@@ -231,8 +231,6 @@ class Flash(Module):
 
     def unsecure(self):
         self.eraseAll()
-        return
-
         self.fcnfg = 0x00
         self.writeAll()
         self.fprot = FPOPEN | FPHDIS | FPLDIS
