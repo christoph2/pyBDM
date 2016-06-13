@@ -64,7 +64,7 @@ class ComPod12(BDMBase, serialport.Port):
 
     def readCommand(self, cmd, responseLen, addr = None):
         self.write(cmd)
-        if not addr is None:
+        if addr:
             self.write((addr >> 8) & 0xff)
             self.write(addr & 0xff)
         data = self.read(responseLen)

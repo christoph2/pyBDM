@@ -76,12 +76,6 @@ class Port(port.Port):
         return bytearray(data)
 
     def close(self):
-        if self.port is not None:
-            if not self.port.closed:
-                self.port.close()
+        if self.port and not self.port.closed:
+            self.port.close()
 
-def main():
-    pass
-
-if __name__=='__main__':
-    main()

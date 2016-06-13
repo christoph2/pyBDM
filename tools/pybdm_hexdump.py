@@ -44,11 +44,11 @@ PODs = {'compod12': ComPod12, 'kevinro': KevinRoBDM12}
 
 VALID_BYTE_COUNTS = (0x01, 0x02, 0x04, 0x08)
 
-arrayToWord = lambda arr: functools.reduce(lambda v, accum: (v * 256) + accum, arr)
+def arrayToWord(arr):
+    return functools.reduce(lambda v, accum: (v * 256) + accum, arr)
 
 def unpack(*args):
     return args
-
 
 def slicer(iteratable, sliceLength, resultType = None):
     if resultType is None:

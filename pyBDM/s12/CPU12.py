@@ -1195,7 +1195,7 @@ class CachedMemory(object):
 
     def flushPage(self, address):
         page = self.getPageAddress(address)
-        if self.cache.has_key(page):
+        if page in self.cache:
             self.cache.pop(address)
 
 
@@ -1237,7 +1237,7 @@ def preDecode(addr, mem):
         opcodeMap = opcodeMapPage1
         page2 = False
     opcode = mem.getByte(addr + idx)
-    mnemonic, _, mode, size = opcodeMap.get(opcode, None)
+    mnemonic, _, mode, size = opcodeMap.get(opcode)
     if mode == ID:
         # Size depends on indexing mode.
         _, _, byteCount = XB.get(mem.getByte(addr + 1 + idx))
@@ -1364,7 +1364,7 @@ def disasm(addr, memory):
     decoder = PostbyteDecoder()
     pc = addr
     op = memory.getByte(pc)
-    mnemonic, _, mode, size = opcodeMapPage1.get(op, None)
+    mnemonic, _, mode, size = opcodeMapPage1.get(op)
     print("0x%04X %02x -- '%s'" % (pc, memory.getByte(pc), mnemonic))
     operand = ''
     xb = None
@@ -1374,11 +1374,11 @@ def disasm(addr, memory):
         pc &= 0xfffff
         op = memory.getByte(pc)
         operand = ''
-        mnemonic, _, mode, size = opcodeMapPage1.get(op, None)
+        mnemonic, _, mode, size = opcodeMapPage1.get(op)
 
         if op == PAGE_TWO:
             op = memory.getByte(pc + 1)
-            mnemonic, cycles, mode, size = opcodeMapPage2.get(op, None)
+            mnemonic, cycles, mode, size = opcodeMapPage2.get(op)
         elif op == TFR_EXG:
             op = memory.getByte(pc + 1)
             eb = EB[op]
@@ -1651,7 +1651,7 @@ class Reader0(object):
 
     def __call__(self, addr, length):
         for data in self._data:
-            if addr >= data.address and addr <= data.address + data.length:
+            if data.address <= addr <= (data.address + data.length):
                 a0 = addr - data.address
                 #print data.data[a0 : a0 + length]
                 return data.data[a0 : a0 + length]
